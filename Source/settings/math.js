@@ -5,17 +5,17 @@ var FullScreenPokemon;
     "use strict";
     FullScreenPokemon.FullScreenPokemon.settings.math = {
         "equations": {
-            "newPokemon": function (constants, equations, title, nickname, level, moves, iv, ev) {
+            "newPokemon": function (constants, equations, title, level, moves, iv, ev) {
                 var statisticNames = constants.statisticNames, pokemon = {
                     "title": title,
-                    "nickname": nickname,
-                    "level": level,
-                    "moves": moves || this.compute("newPokemonMoves", title, level),
+                    "nickname": title,
+                    "level": level || 1,
+                    "moves": moves || this.compute("newPokemonMoves", title, level || 1),
                     "types": constants.pokemon[title.join("")].types,
                     "status": "",
                     "IV": iv || this.compute("newPokemonIVs"),
                     "EV": ev || this.compute("newPokemonEVs"),
-                    "experience": this.compute("newPokemonExperience", title, level)
+                    "experience": this.compute("newPokemonExperience", title, level || 1)
                 }, i;
                 for (i = 0; i < statisticNames.length; i += 1) {
                     pokemon[statisticNames[i]] = this.compute("pokemonStatistic", pokemon, statisticNames[i]);
@@ -373,6 +373,8 @@ var FullScreenPokemon;
             }
         },
         "constants": {
+            "statisticNames": ["HP", "Attack", "Defense", "Speed", "Special"],
+            "statisticNamesDisplayed": ["Attack", "Defense", "Speed", "Special"],
             "statuses": {
                 "names": ["Sleep", "Freeze", "Paralyze", "Burn", "Poison"],
                 "probability25": {
@@ -401,6 +403,12 @@ var FullScreenPokemon;
                     "Burn": 5,
                     "Poison": 5
                 }
+            },
+            "townMapLocations": {
+                "Pallet Town": [18, 48],
+                "Pewter City": [18, 16],
+                "Serebii Islands": [18, 64],
+                "Viridian City": [18, 36]
             },
             /**
              * Run on http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart#Generation_I

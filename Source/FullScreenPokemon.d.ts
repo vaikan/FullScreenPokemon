@@ -53,6 +53,7 @@ declare module FullScreenPokemon {
     export interface IMathConstants {
         NumberMaker?: NumberMakr.INumberMakr;
         statisticNames?: string[];
+        statisticNamesDisplayed?: string[];
         statuses: {
             names: string[];
             probability25: {
@@ -68,6 +69,12 @@ declare module FullScreenPokemon {
                 [i: string]: number;
             }
         };
+        /**
+         * [X, Y] coordinates for spots on the Town Map to display Thing icons.
+         */
+        townMapLocations: {
+            [i: string]: [number, number];
+        };
         types: {
             names: string[];
             indices: {
@@ -76,7 +83,7 @@ declare module FullScreenPokemon {
             table: number[][];
         };
         pokemon: {
-            [i: string]: IPokemonSchema;
+            [i: string]: IPokemonListing;
         };
         moves: {
             [i: string]: IMoveSchema;
@@ -90,7 +97,7 @@ declare module FullScreenPokemon {
     }
 
     export interface IMathEquations extends MathDecidr.IEquationContainer {
-        newPokemon: (constants: IMathConstants, equations: IMathEquations, title: string[], nickname: string[], level: number, moves: BattleMovr.IMove[], iv: number, ev: number) => IPokemon;
+        newPokemon: (constants: IMathConstants, equations: IMathEquations, title: string[], level?: number, moves?: BattleMovr.IMove[], iv?: number, ev?: number) => IPokemon;
         newPokemonMoves: (constants: IMathConstants, equations: IMathEquations, title: string[], level: number) => BattleMovr.IMove[];
         newPokemonIVs: (constants: IMathConstants, equations: IMathEquations) => { [i: string]: number };
         newPokemonEVs: (constants: IMathConstants, equations: IMathEquations) => { [i: string]: number };
@@ -133,17 +140,15 @@ declare module FullScreenPokemon {
         ItemsHolder: ItemsHoldr.IItemsHoldr;
     }
 
-    export interface IPokedexListing {
-        caught: boolean;
+    export interface IPokemonListing {
         height: string[]; // ["feet", "inches"] (e.x. ["1", "8"])
-        seen: boolean;
-        title: string;
         label: string;
         number: number;
         sprite: string;
         info: string[];
-        evolvesInto: string;
-        evolvesVia: number;
+        evolvesInto?: string;
+        evolvesVia?: string;
+        experienceType?: string; // Todo: once all are known, make non-optional
         weight: number;
         types: string[];
         HP: number;
@@ -151,16 +156,32 @@ declare module FullScreenPokemon {
         Defense: number;
         Special: number;
         Speed: number;
-        moves: IPokedexMovesListing;
+        moves: IPokemonMovesListing;
     }
 
-    export interface IPokedexMovesListing {
-        natural: IPokedexMove[];
-        hm: IPokedexMove;
-        tm: IPokedexMove;
+    export interface IPokedexListing extends IPokemonListing {
+        caught?: boolean;
+        seen?: boolean;
+        title: string;
     }
 
-    export interface IPokedexMove {
+    export interface IPokedexInformation {
+        caught: boolean;
+        seen: boolean;
+        title: string[];
+    }
+
+    export interface IPokedex {
+        [i: string]: IPokedexInformation;
+    }
+
+    export interface IPokemonMovesListing {
+        natural: IPokemonMoveListing[];
+        hm: IPokemonMoveListing[];
+        tm: IPokemonMoveListing[];
+    }
+
+    export interface IPokemonMoveListing {
         move: string;
         level?: number;
     }
@@ -231,34 +252,6 @@ declare module FullScreenPokemon {
         levels?: number[];
         moves?: string[];
         rate?: number;
-    }
-
-    export interface IPokemonSchema {
-        label: string;
-        sprite: string;
-        info: string[];
-        experienceType?: string;
-        evolvesInto?: string;
-        evolvesVia?: string;
-        number: number;
-        height: [string, string];
-        weight: number;
-        types: string[];
-        HP: number;
-        Attack: number;
-        Defense: number;
-        Special: number;
-        Speed: number;
-        moves: {
-            natural: IMoveLearnedSchema[];
-            hm: IMoveLearnedSchema[];
-            tm: IMoveLearnedSchema[];
-        };
-    }
-
-    export interface IMoveLearnedSchema {
-        move: string;
-        level: number;
     }
 
     export interface IMoveSchema {
@@ -513,6 +506,7 @@ declare module FullScreenPokemon {
         light?: boolean;
         lined?: boolean;
         plain?: boolean;
+        watery?: boolean;
     }
 
     export interface IMenuSchema extends IMenuBase {

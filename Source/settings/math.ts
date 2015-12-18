@@ -6,18 +6,18 @@ module FullScreenPokemon {
 
     FullScreenPokemon.settings.math = {
         "equations": {
-            "newPokemon": function (constants: IMathConstants, equations: IMathEquations, title: string[], nickname: string[], level: number, moves: BattleMovr.IMove[], iv: number, ev: number): IPokemon {
+            "newPokemon": function (constants: IMathConstants, equations: IMathEquations, title: string[], level?: number, moves?: BattleMovr.IMove[], iv?: number, ev?: number): IPokemon {
                 var statisticNames: string[] = constants.statisticNames,
                     pokemon: any = {
                         "title": title,
-                        "nickname": nickname,
-                        "level": level,
-                        "moves": moves || this.compute("newPokemonMoves", title, level),
+                        "nickname": title,
+                        "level": level || 1,
+                        "moves": moves || this.compute("newPokemonMoves", title, level || 1),
                         "types": constants.pokemon[title.join("")].types,
                         "status": "",
                         "IV": iv || this.compute("newPokemonIVs"),
                         "EV": ev || this.compute("newPokemonEVs"),
-                        "experience": this.compute("newPokemonExperience", title, level)
+                        "experience": this.compute("newPokemonExperience", title, level || 1)
                     },
                     i: number;
 
@@ -32,9 +32,9 @@ module FullScreenPokemon {
             },
             // http://bulbapedia.bulbagarden.net/wiki/XXXXXXX_(Pok%C3%A9mon)/Generation_I_learnset
             "newPokemonMoves": function (constants: IMathConstants, equations: IMathEquations, title: string[], level: number): BattleMovr.IMove[] {
-                var possibilities: IMoveLearnedSchema[] = constants.pokemon[title.join("")].moves.natural,
+                var possibilities: IPokemonMoveListing[] = constants.pokemon[title.join("")].moves.natural,
                     output: BattleMovr.IMove[] = [],
-                    move: IMoveLearnedSchema,
+                    move: IPokemonMoveListing,
                     newMove: BattleMovr.IMove,
                     end: number,
                     i: number;
@@ -456,7 +456,7 @@ module FullScreenPokemon {
             // http://m.bulbapedia.bulbagarden.net/wiki/Experience#Relation_to_level
             // Wild Pokémon of any level will always have the base amount of experience required to reach that level when caught, as will Pokémon hatched from Eggs.
             "experienceStarting": function (constants: IMathConstants, equations: IMathEquations, title: string[], level: number): number {
-                var reference: IPokemonSchema = constants.pokemon[title.join("")];
+                var reference: IPokemonListing = constants.pokemon[title.join("")];
 
                 // TODO: remove defaulting to mediumFast
                 switch (reference.experienceType) {
@@ -510,6 +510,8 @@ module FullScreenPokemon {
             }
         },
         "constants": {
+            "statisticNames": ["HP", "Attack", "Defense", "Speed", "Special"],
+            "statisticNamesDisplayed": ["Attack", "Defense", "Speed", "Special"],
             "statuses": {
                 "names": ["Sleep", "Freeze", "Paralyze", "Burn", "Poison"],
                 "probability25": {
@@ -538,6 +540,12 @@ module FullScreenPokemon {
                     "Burn": 5,
                     "Poison": 5
                 }
+            },
+            "townMapLocations": {
+                "Pallet Town": [18, 48],
+                "Pewter City": [18, 16],
+                "Serebii Islands": [18, 64],
+                "Viridian City": [18, 36]
             },
             /**
              * Run on http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart#Generation_I
@@ -749,8 +757,6 @@ module FullScreenPokemon {
                     "info": [
                         "A ferocious, prehistoric %%%%%%%POKEMON%%%%%%% that goes for the enemy's throat with its serrated saw-like fangs."
                     ],
-
-
                     "number": 142,
                     "height": ["5", "11"],
                     "weight": 130.1,
@@ -1994,8 +2000,6 @@ module FullScreenPokemon {
                     "info": [
                         "Spits fire that is hot enough to melt boulders. Known to cause forest fires unintentionally."
                     ],
-
-
                     "number": 6,
                     "height": ["5", "7"],
                     "weight": 199.5,
