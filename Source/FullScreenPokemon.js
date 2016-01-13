@@ -294,12 +294,12 @@ var FullScreenPokemon;
             // ThingHittr becomes very non-performant if functions aren't generated
             // for each Thing constructor (optimization does not respect prototypal 
             // inheritance, sadly).
-            thing.FSP.ThingHitter.cacheHitCheckType(thing.title, thing.groupType);
+            thing.FSP.ThingHitter.cacheChecksForType(thing.title, thing.groupType);
             thing.bordering = [undefined, undefined, undefined, undefined];
             if (typeof thing.id === "undefined") {
                 thing.id = [
-                    thing.FSP.MapsHandler.getMapName(),
-                    thing.FSP.MapsHandler.getAreaName(),
+                    thing.FSP.AreaSpawner.getMapName(),
+                    thing.FSP.AreaSpawner.getAreaName(),
                     thing.title,
                     (thing.name || "Anonymous")
                 ].join("::");
@@ -382,8 +382,8 @@ var FullScreenPokemon;
                 return;
             }
             thing.spawned = true;
-            thing.areaName = thing.areaName || thing.FSP.MapsHandler.getAreaName();
-            thing.mapName = thing.mapName || thing.FSP.MapsHandler.getMapName();
+            thing.areaName = thing.areaName || thing.FSP.AreaSpawner.getAreaName();
+            thing.mapName = thing.mapName || thing.FSP.AreaSpawner.getMapName();
             thing.FSP.addThing(thing, prething.left * thing.FSP.unitsize - thing.FSP.MapScreener.left, prething.top * thing.FSP.unitsize - thing.FSP.MapScreener.top, true);
             // Either the prething or thing, in that order, may request to be in the
             // front or back of the container
@@ -787,7 +787,7 @@ var FullScreenPokemon;
                     continue;
                 }
                 FSP.QuadsKeeper.determineThingQuadrants(character);
-                FSP.ThingHitter.checkHitsOf[character.title](character);
+                FSP.ThingHitter.checkHitsForThing(character);
             }
         };
         /**
@@ -951,7 +951,7 @@ var FullScreenPokemon;
          *
          */
         FullScreenPokemon.prototype.animateGrassBattleStart = function (thing, grass) {
-            var grassMap = thing.FSP.MapsHandler.getMap(grass.mapName), grassArea = grassMap.areas[grass.areaName], options = grassArea.wildPokemon.grass, chosen = thing.FSP.chooseRandomWildPokemon(thing.FSP, options), chosenPokemon = thing.FSP.createPokemon(chosen);
+            var grassMap = thing.FSP.AreaSpawner.getMap(grass.mapName), grassArea = grassMap.areas[grass.areaName], options = grassArea.wildPokemon.grass, chosen = thing.FSP.chooseRandomWildPokemon(thing.FSP, options), chosenPokemon = thing.FSP.createPokemon(chosen);
             thing.FSP.removeClass(thing, "walking");
             if (thing.shadow) {
                 thing.FSP.removeClass(thing.shadow, "walking");
@@ -1751,35 +1751,31 @@ var FullScreenPokemon;
                 // If other is a large solid, this will be irreleveant, so it's ok
                 // that multiple borderings will be replaced by the most recent
                 switch (thing.FSP.getDirectionBordering(thing, other)) {
-                    case 0:
-                        if (thing.left !== other.right - other.tolRight
-                            && thing.right !== other.left + other.tolLeft) {
-                            thing.bordering[0] = other;
-                            other.bordering[2] = thing;
+                    case Direction.Top:
+                        if (thing.left !== other.right - other.tolRight && thing.right !== other.left + other.tolLeft) {
+                            thing.FSP.setThingBordering(thing, other, Direction.Top);
+                            thing.FSP.setThingBordering(other, thing, Direction.Bottom);
                             thing.FSP.setTop(thing, other.bottom - other.tolBottom);
                         }
                         break;
-                    case 1:
-                        if (thing.top !== other.bottom - other.tolBottom
-                            && thing.bottom !== other.top + other.tolTop) {
-                            thing.bordering[1] = other;
-                            other.bordering[3] = thing;
+                    case Direction.Right:
+                        if (thing.top !== other.bottom - other.tolBottom && thing.bottom !== other.top + other.tolTop) {
+                            thing.FSP.setThingBordering(thing, other, Direction.Right);
+                            thing.FSP.setThingBordering(other, thing, Direction.Left);
                             thing.FSP.setRight(thing, other.left + other.tolLeft);
                         }
                         break;
-                    case 2:
-                        if (thing.left !== other.right - other.tolRight
-                            && thing.right !== other.left + other.tolLeft) {
-                            thing.bordering[2] = other;
-                            other.bordering[0] = thing;
+                    case Direction.Bottom:
+                        if (thing.left !== other.right - other.tolRight && thing.right !== other.left + other.tolLeft) {
+                            thing.FSP.setThingBordering(thing, other, Direction.Bottom);
+                            thing.FSP.setThingBordering(other, thing, Direction.Top);
                             thing.FSP.setBottom(thing, other.top + other.tolTop);
                         }
                         break;
-                    case 3:
-                        if (thing.top !== other.bottom - other.tolBottom
-                            && thing.bottom !== other.top + other.tolTop) {
-                            thing.bordering[3] = other;
-                            other.bordering[1] = thing;
+                    case Direction.Left:
+                        if (thing.top !== other.bottom - other.tolBottom && thing.bottom !== other.top + other.tolTop) {
+                            thing.FSP.setThingBordering(thing, other, Direction.Left);
+                            thing.FSP.setThingBordering(other, thing, Direction.Right);
                             thing.FSP.setLeft(thing, other.right - other.tolRight);
                         }
                         break;
@@ -1787,6 +1783,19 @@ var FullScreenPokemon;
                         break;
                 }
             };
+        };
+        /**
+         * Marks other as being a border of thing in the given direction, respecting borderPrimary.
+         *
+         * @param thing   A Thing whose borders are being checked.
+         * @param other   A new border for thing.
+         * @param direction   The direction border being changed.
+         */
+        FullScreenPokemon.prototype.setThingBordering = function (thing, other, direction) {
+            if (thing.bordering[direction] && thing.bordering[direction].borderPrimary && !other.borderPrimary) {
+                return;
+            }
+            thing.bordering[direction] = other;
         };
         /**
          *
@@ -2309,24 +2318,24 @@ var FullScreenPokemon;
          *
          */
         FullScreenPokemon.prototype.spawnAreaSpawner = function (thing) {
-            var map = thing.FSP.MapsHandler.getMap(thing.map), area = map.areas[thing.area];
-            if (area === thing.FSP.MapsHandler.getArea()) {
+            var map = thing.FSP.AreaSpawner.getMap(thing.map), area = map.areas[thing.area];
+            if (area === thing.FSP.AreaSpawner.getArea()) {
                 thing.FSP.killNormal(thing);
                 return;
             }
             if (area.spawnedBy
-                && area.spawnedBy === thing.FSP.MapsHandler.getArea().spawnedBy) {
+                && area.spawnedBy === thing.FSP.AreaSpawner.getArea().spawnedBy) {
                 thing.FSP.killNormal(thing);
                 return;
             }
-            area.spawnedBy = thing.FSP.MapsHandler.getArea().spawnedBy;
+            area.spawnedBy = thing.FSP.AreaSpawner.getArea().spawnedBy;
             thing.FSP.activateAreaSpawner(thing, area);
         };
         /**
          *
          */
         FullScreenPokemon.prototype.activateAreaSpawner = function (thing, area) {
-            var creation = area.creation, FSP = thing.FSP, MapsCreator = FSP.MapsCreator, MapsHandler = FSP.MapsHandler, QuadsKeeper = FSP.QuadsKeeper, areaCurrent = MapsHandler.getArea(), mapCurrent = MapsHandler.getMap(), prethingsCurrent = MapsHandler.getPreThings(), left = thing.left + thing.FSP.MapScreener.left, top = thing.top + thing.FSP.MapScreener.top, x, y, command, i;
+            var creation = area.creation, FSP = thing.FSP, MapsCreator = FSP.MapsCreator, AreaSpawner = FSP.AreaSpawner, QuadsKeeper = FSP.QuadsKeeper, areaCurrent = AreaSpawner.getArea(), mapCurrent = AreaSpawner.getMap(), prethingsCurrent = AreaSpawner.getPreThings(), left = thing.left + thing.FSP.MapScreener.left, top = thing.top + thing.FSP.MapScreener.top, x, y, command, i;
             switch (thing.direction) {
                 case 0:
                     top -= area.height * thing.FSP.unitsize;
@@ -2371,10 +2380,9 @@ var FullScreenPokemon;
                 }
                 MapsCreator.analyzePreSwitch(command, prethingsCurrent, areaCurrent, mapCurrent);
             }
-            MapsHandler.spawnMap("xInc", QuadsKeeper.top / FSP.unitsize, QuadsKeeper.right / FSP.unitsize, QuadsKeeper.bottom / FSP.unitsize, QuadsKeeper.left / FSP.unitsize);
+            AreaSpawner.spawnArea("xInc", QuadsKeeper.top / FSP.unitsize, QuadsKeeper.right / FSP.unitsize, QuadsKeeper.bottom / FSP.unitsize, QuadsKeeper.left / FSP.unitsize);
             area.spawned = true;
             FSP.killNormal(thing);
-            // MapScreener.setVariables();
         };
         /**
          *
@@ -3184,7 +3192,7 @@ var FullScreenPokemon;
             if (!thing.grass || thing.FSP.MenuGrapher.getActiveMenu()) {
                 return;
             }
-            if (!thing.FSP.ThingHitter.checkHit(thing, thing.grass, thing.title, thing.grass.groupType)) {
+            if (!thing.FSP.ThingHitter.checkHitForThings(thing, thing.grass)) {
                 delete thing.grass;
                 return;
             }
@@ -3248,7 +3256,7 @@ var FullScreenPokemon;
         FullScreenPokemon.prototype.setBattleDisplayPokemonHealthBar = function (FSP, battlerName, hp, hpNormal) {
             var nameUpper = battlerName[0].toUpperCase() + battlerName.slice(1), menuNumbers = "Battle" + nameUpper + "HealthNumbers", bar = FSP.getThingById("HPBarFill" + nameUpper), barWidth = FSP.MathDecider.compute("widthHealthBar", 25, hp, hpNormal), healthDialog = FSP.makeDigit(hp, 3, "\t") + "/" + FSP.makeDigit(hpNormal, 3, "\t");
             if (FSP.MenuGrapher.getMenu(menuNumbers)) {
-                FSP.MenuGrapher.getMenu(menuNumbers).children.forEach(FSP.killNormal);
+                FSP.MenuGrapher.getMenu(menuNumbers).children.forEach(FSP.killNormal.bind(FSP));
                 FSP.MenuGrapher.addMenuDialog(menuNumbers, healthDialog);
             }
             FSP.setWidth(bar, barWidth);
@@ -4338,7 +4346,8 @@ var FullScreenPokemon;
                                 "top": 4.25
                             }
                         }
-                    }, {
+                    },
+                    {
                         "type": "text",
                         "words": [text],
                         "position": {
@@ -5640,9 +5649,9 @@ var FullScreenPokemon;
          */
         FullScreenPokemon.prototype.saveGame = function () {
             var FSP = FullScreenPokemon.prototype.ensureCorrectCaller(this), ticksRecorded = FSP.FPSAnalyzer.getNumRecorded();
-            FSP.ItemsHolder.setItem("map", FSP.MapsHandler.getMapName());
-            FSP.ItemsHolder.setItem("area", FSP.MapsHandler.getAreaName());
-            FSP.ItemsHolder.setItem("location", FSP.MapsHandler.getLocationEntered().name);
+            FSP.ItemsHolder.setItem("map", FSP.AreaSpawner.getMapName());
+            FSP.ItemsHolder.setItem("area", FSP.AreaSpawner.getAreaName());
+            FSP.ItemsHolder.setItem("location", FSP.AreaSpawner.getLocationEntered().name);
             FSP.ItemsHolder.increase("time", ticksRecorded - FSP.ticksElapsed);
             FSP.ticksElapsed = ticksRecorded;
             FSP.saveCharacterPositions(FSP);
@@ -5681,9 +5690,9 @@ var FullScreenPokemon;
         FullScreenPokemon.prototype.setMap = function (name, location, noEntrance) {
             var FSP = FullScreenPokemon.prototype.ensureCorrectCaller(this), map;
             if (typeof name === "undefined" || name.constructor === FullScreenPokemon) {
-                name = FSP.MapsHandler.getMapName();
+                name = FSP.AreaSpawner.getMapName();
             }
-            map = FSP.MapsHandler.setMap(name);
+            map = FSP.AreaSpawner.setMap(name);
             FSP.ModAttacher.fireEvent("onPreSetMap", map);
             FSP.NumberMaker.resetFromSeed(map.seed);
             FSP.InputWriter.restartHistory();
@@ -5704,15 +5713,15 @@ var FullScreenPokemon;
             FSP.MapScreener.thingsById = FSP.generateThingsByIdContainer();
             FSP.MenuGrapher.setActiveMenu(undefined);
             FSP.TimeHandler.cancelAllEvents();
-            FSP.MapsHandler.setLocation(name);
+            FSP.AreaSpawner.setLocation(name);
             FSP.MapScreener.setVariables();
-            location = FSP.MapsHandler.getLocation(name);
+            location = FSP.AreaSpawner.getLocation(name);
             location.area.spawnedBy = {
                 "name": name,
                 "timestamp": new Date().getTime()
             };
             FSP.ModAttacher.fireEvent("onPreSetLocation", location);
-            FSP.PixelDrawer.setBackground(FSP.MapsHandler.getArea().background);
+            FSP.PixelDrawer.setBackground(FSP.AreaSpawner.getArea().background);
             FSP.StateHolder.setCollection(location.area.map.name + "::" + location.area.name);
             FSP.QuadsKeeper.resetQuadrants();
             theme = location.theme || location.area.theme || location.area.map.theme;
@@ -5736,7 +5745,7 @@ var FullScreenPokemon;
          *
          */
         FullScreenPokemon.prototype.getAreaBoundariesReal = function (FSP) {
-            var area = FSP.MapsHandler.getArea();
+            var area = FSP.AreaSpawner.getArea();
             if (!area) {
                 return {
                     "top": 0,
@@ -5760,7 +5769,7 @@ var FullScreenPokemon;
          *
          */
         FullScreenPokemon.prototype.getScreenScrollability = function (FSP) {
-            var area = FSP.MapsHandler.getArea(), boundaries, width, height;
+            var area = FSP.AreaSpawner.getArea(), boundaries, width, height;
             if (!area) {
                 return "none";
             }
@@ -5794,7 +5803,7 @@ var FullScreenPokemon;
          * @remarks Direction is taken in by the .forEach call as the index. Clever.
          */
         FullScreenPokemon.prototype.mapAddAfter = function (prething, direction) {
-            var FSP = FullScreenPokemon.prototype.ensureCorrectCaller(this), MapsCreator = FSP.MapsCreator, MapsHandler = FSP.MapsHandler, prethings = MapsHandler.getPreThings(), area = MapsHandler.getArea(), map = MapsHandler.getMap(), boundaries = FSP.MapsHandler.getArea().boundaries;
+            var FSP = FullScreenPokemon.prototype.ensureCorrectCaller(this), MapsCreator = FSP.MapsCreator, AreaSpawner = FSP.AreaSpawner, prethings = AreaSpawner.getPreThings(), area = AreaSpawner.getArea(), map = AreaSpawner.getMap(), boundaries = FSP.AreaSpawner.getArea().boundaries;
             prething.direction = direction;
             switch (direction) {
                 case 0:
@@ -6924,6 +6933,8 @@ var FullScreenPokemon;
             "generator": undefined,
             "groups": undefined,
             "events": undefined,
+            "help": undefined,
+            "items": undefined,
             "input": undefined,
             "maps": undefined,
             "math": undefined,
@@ -6936,7 +6947,6 @@ var FullScreenPokemon;
             "scenes": undefined,
             "sprites": undefined,
             "states": undefined,
-            "statistics": undefined,
             "touch": undefined,
             "ui": undefined
         };

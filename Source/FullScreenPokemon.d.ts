@@ -356,6 +356,7 @@ declare module FullScreenPokemon {
         activate?: (activator: IThing, activated?: IThing) => void;
         areaName: string;
         bordering: IThing[];
+        borderPrimary?: boolean;
         collide(thing: IThing, other: IThing): boolean;
         cycles?: any;
         dead?: boolean;
@@ -363,11 +364,16 @@ declare module FullScreenPokemon {
         flickering?: boolean;
         id: string;
         mapName: string;
+
+        /**
+         * Whether this is barred from colliding with other Things.
+         */
+        nocollide?: boolean;
         numquads: number;
         offsetX?: number;
         offsetY?: number;
         position: string;
-        spawned: boolean; // part of the big MapsHandlr expansion to be added back
+        spawned: boolean;
         tolBottom: number;
         tolLeft: number;
         tolRight: number;
@@ -387,7 +393,7 @@ declare module FullScreenPokemon {
         distance: number;
         follower?: ICharacter;
         following?: ICharacter;
-        followingLoop?: TimeHandlr.IEvent;
+        followingLoop?: TimeHandlr.ITimeEvent;
         gift?: string;
         grass?: IGrass;
         heightGrass?: number;
@@ -415,7 +421,7 @@ declare module FullScreenPokemon {
         turning?: Direction;
         walking?: boolean;
         walkingCommands?: Direction[];
-        walkingFlipping?: TimeHandlr.IEvent;
+        walkingFlipping?: TimeHandlr.ITimeEvent;
     }
 
     export interface IEnemy extends ICharacter {
