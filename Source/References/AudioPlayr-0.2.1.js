@@ -89,7 +89,7 @@ var AudioPlayr;
          * @returns The current volume as a Number in [0,1], retrieved by the ItemsHoldr.
          */
         AudioPlayr.prototype.getVolume = function () {
-            return Number(this.ItemsHolder.getItem("volume") || 0);
+            return parseFloat(this.ItemsHolder.getItem("volume")) || 1;
         };
         /**
          * Sets the current volume. If not muted, all sounds will have their volume
@@ -217,7 +217,9 @@ var AudioPlayr;
                 sound.setAttribute("volumeReal", "1");
                 sound.volume = this.getVolume();
             }
-            this.playSound(sound);
+            // This gives enough time after a call to pause so a Promise exception
+            // does not occur during the buffering for play.
+            setTimeout(this.playSound.bind(this), 1, sound);
             used = Number(sound.getAttribute("used"));
             // If this is the song's first play, let it know how to stop
             if (!used) {

@@ -35,6 +35,7 @@ FullScreenPokemon.FullScreenPokemon.settings.maps.library["Viridian Forest"] = {
     },
     "areas": {
         "Gate North": {
+            "allowCycling": false,
             "width": 80,
             "height": 64,
             "theme": "Pewter City",
@@ -59,6 +60,7 @@ FullScreenPokemon.FullScreenPokemon.settings.maps.library["Viridian Forest"] = {
             ],
         },
         "Forest": {
+            "allowCycling": true,
             "width": 272,
             "height": 384,
             "wildPokemon": {
@@ -213,6 +215,7 @@ FullScreenPokemon.FullScreenPokemon.settings.maps.library["Viridian Forest"] = {
             ]
         },
         "Gate South": {
+            "allowCycling": false,
             "width": 80,
             "height": 64,
             "theme": "Pewter City",
@@ -233,7 +236,7 @@ FullScreenPokemon.FullScreenPokemon.settings.maps.library["Viridian Forest"] = {
                 { "thing": "Lady", "x": 64, "y": 32, "direction": 3, "dialog": "Are you going to VIRIDIAN FOREST? Be careful, it's a natural maze!" },
                 { "thing": "LittleGirl", "x": 16, "y": 40, "direction": 0, "roaming": true, "roamingDirections": [0, 2], "dialog": "RATTATA may be small, but its bite is wicked! Did you get one?" },
                 { "thing": "Doormat", "x": 32, "y": 56, "width": 16, "entrance": "Gate South Door South" },
-                { "thing": "HiddenTransporter", "x": 32, "y": 56, "width": 16, "directionRequired": 2, "transport": { "map": "Route 2" } }
+                { "thing": "HiddenTransporter", "x": 32, "y": 56, "width": 16, "directionRequired": 2, "transport": { "map": "Route 2", "location": "Viridian Forest Bottom" } }
             ]
         }
     }

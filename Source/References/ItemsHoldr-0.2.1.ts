@@ -16,6 +16,13 @@ declare module ItemsHoldr {
     }
 
     /**
+     * A container to hold ItemValue objects, keyed by name.
+     */
+    export interface IItems {
+        [i: string]: IItemValue;
+    }
+
+    /**
      * Settings to initialize a new instance of the IItemValue interface.
      */
     export interface IItemValueSettings {
@@ -395,6 +402,11 @@ declare module ItemsHoldr {
          * @param key   The key of the ItemValue.
          */
         toggle(key: string): void;
+
+        /**
+         * Toggles whether autoSave is true or false.
+         */
+        toggleAutoSave(): void;
         
         /**
          * Ensures a key exists in values. If it doesn't, and new values are
@@ -747,7 +759,7 @@ module ItemsHoldr {
          * 
          * @returns {Mixed}
          */
-        private retrieveLocalStorage(): void {
+        private retrieveLocalStorage(): any {
             var value: any = localStorage.getItem(this.ItemsHolder.getPrefix() + this.key);
 
             if (value === "undefined") {
@@ -768,9 +780,14 @@ module ItemsHoldr {
      */
     export class ItemsHoldr implements IItemsHoldr {
         /**
+         * Settings used to construct this ItemsHoldr.
+         */
+        private settings: IItemsHoldrSettings;
+
+        /**
          * The ItemValues being stored, keyed by name.
          */
-        private items: { [i: string]: ItemValue };
+        private items: IItems;
 
         /**
          * A listing of all the String keys for the stored items.
@@ -828,10 +845,9 @@ module ItemsHoldr {
          * @param settings   Any optional custom settings.
          */
         constructor(settings: IItemsHoldrSettings = {}) {
-            var key: string;
-
-            this.prefix = settings.prefix || "";
+            this.settings = settings;
             this.autoSave = settings.autoSave;
+            this.prefix = settings.prefix || "";
             this.callbackArgs = settings.callbackArgs || [];
 
             this.allowNewItems = settings.allowNewItems === undefined
@@ -848,18 +864,7 @@ module ItemsHoldr {
             this.defaults = settings.defaults || {};
             this.displayChanges = settings.displayChanges || {};
 
-            this.items = {};
-            if (settings.values) {
-                this.itemKeys = Object.keys(settings.values);
-
-                for (key in settings.values) {
-                    if (settings.values.hasOwnProperty(key)) {
-                        this.addItem(key, settings.values[key]);
-                    }
-                }
-            } else {
-                this.itemKeys = [];
-            }
+            this.resetItemsToDefaults();
 
             if (settings.doMakeContainer) {
                 this.containersArguments = settings.containersArguments || [
@@ -1009,7 +1014,7 @@ module ItemsHoldr {
          * @param settings   The settings for the new ItemValue.
          * @returns The newly created ItemValue.
          */
-        addItem(key: string, settings: any = {}): ItemValue {
+        addItem(key: string, settings: any = {}): IItemValue {
             this.items[key] = new ItemValue(this, key, settings);
             this.itemKeys.push(key);
             return this.items[key];
@@ -1033,6 +1038,7 @@ module ItemsHoldr {
             this.itemKeys.splice(this.itemKeys.indexOf(key), 1);
 
             delete this.items[key];
+            delete this.localStorage[this.prefix + key];
         }
 
         /**
@@ -1049,9 +1055,8 @@ module ItemsHoldr {
                     }
                 }
             }
-
-            this.items = {};
-            this.itemKeys = [];
+            
+            this.resetItemsToDefaults();
         }
 
         /**
@@ -1114,6 +1119,13 @@ module ItemsHoldr {
             value = value ? false : true;
 
             this.items[key].setValue(value);
+        }
+
+        /**
+         * Toggles whether autoSave is true or false.
+         */
+        toggleAutoSave(): void {
+            this.autoSave = !this.autoSave;
         }
 
         /**
@@ -1393,6 +1405,24 @@ module ItemsHoldr {
             });
 
             return output;
+        }
+
+        /**
+         * Resets this.items to their default values and resets this.itemKeys.
+         */
+        private resetItemsToDefaults(): void {
+            this.items = {};
+            this.itemKeys = [];
+
+            if (!this.settings.values) {
+                return;
+            }
+
+            for (var key in this.settings.values) {
+                if (this.settings.values.hasOwnProperty(key)) {
+                    this.addItem(key, this.settings.values[key]);
+                }
+            }
         }
     }
 }

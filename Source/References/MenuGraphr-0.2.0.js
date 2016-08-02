@@ -34,6 +34,7 @@ var MenuGraphr;
             this.aliases = settings.aliases || {};
             this.replacements = settings.replacements || {};
             this.replacerKey = settings.replacerKey || "%%%%%%%";
+            this.sounds = settings.sounds || {};
             this.menus = {};
         }
         /* Simple gets
@@ -210,6 +211,16 @@ var MenuGraphr;
                 this.deleteMenu(this.activeMenu.name);
             }
         };
+        /**
+         * Deletes all menus.
+         */
+        MenuGraphr.prototype.deleteAllMenus = function () {
+            for (var key in this.menus) {
+                if (this.menus.hasOwnProperty(key)) {
+                    this.deleteMenu(key);
+                }
+            }
+        };
         /* Menu text
         */
         /**
@@ -269,6 +280,9 @@ var MenuGraphr;
             this.GameStarter.TimeHandler.addEvent(function () {
                 _this.addMenuWords(name, progress.words, progress.i, progress.x, progress.y, progress.onCompletion);
             }, character.paddingY + 1);
+            if (this.sounds.onInteraction) {
+                this.GameStarter.AudioPlayer.play(this.sounds.onInteraction);
+            }
         };
         /* Lists
         */
@@ -492,15 +506,18 @@ var MenuGraphr;
         /**
          * Sets the currently active menu.
          *
-         * @param name   The name of the menu to set as active.
+         * @param name   The name of the menu to set as active. If not given, no menu
+         *               is set as active.
          */
         MenuGraphr.prototype.setActiveMenu = function (name) {
             if (this.activeMenu && this.activeMenu.onInactive) {
                 this.activeMenu.onInactive(this.activeMenu.name);
             }
-            this.activeMenu = this.menus[name];
-            if (this.activeMenu && this.activeMenu.onActive) {
-                this.activeMenu.onActive(name);
+            if (typeof name !== "undefined") {
+                this.activeMenu = this.menus[name];
+                if (this.activeMenu && this.activeMenu.onActive) {
+                    this.activeMenu.onActive(name);
+                }
             }
         };
         /**
@@ -593,6 +610,9 @@ var MenuGraphr;
             if (menu.callback) {
                 menu.callback(menu.name);
             }
+            if (this.sounds.onInteraction && (!menu.progress || !menu.progress.working)) {
+                this.GameStarter.AudioPlayer.play(this.sounds.onInteraction);
+            }
         };
         /**
          * Reacts to a user event from pressing a deselection key.
@@ -617,6 +637,9 @@ var MenuGraphr;
             }
             else {
                 this.deleteMenu(menu.name);
+            }
+            if (this.sounds.onInteraction && (!menu.progress || !menu.progress.working)) {
+                this.GameStarter.AudioPlayer.play(this.sounds.onInteraction);
             }
         };
         /**

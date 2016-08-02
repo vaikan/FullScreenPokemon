@@ -297,7 +297,7 @@ declare module GameStartr {
         /**
          * A prefix to add before IItemsValue keys.
          */
-        prefix: string;
+        prefix?: string;
 
         /**
          * Whether an HTML container should be created to house the IItemValue elements.
@@ -314,19 +314,19 @@ declare module GameStartr {
         /**
          * An Array of elements as createElement arguments, outside-to-inside.
          */
-        containersArguments: any[][];
+        containersArguments?: any[][];
 
         /**
          * Default attributes for all ItemValues.
          */
-        defaults: {
-            [i: string]: string;
+        defaults?: {
+            [i: string]: any;
         };
 
         /**
          * Initial item values (defaults) to store.
          */
-        values: ItemsHoldr.IItemValueDefaults;
+        values?: ItemsHoldr.IItemValueDefaults;
     }
 
     /**
@@ -396,6 +396,20 @@ declare module GameStartr {
         locationDefault: string;
 
         /**
+         * Function for when a PreThing is to be spawned.
+         * 
+         * @param prething   A PreThing entering the map.
+         */
+        onSpawn?: (prething: MapsCreatr.IPreThing) => void;
+
+        /**
+         * Function for when a PreThing is to be un-spawned.
+         * 
+         * @param prething   A PreThing leaving the map.
+         */
+        onUnspawn?: (prething: MapsCreatr.IPreThing) => void;
+
+        /**
          * Whether Locations must have an entrance Function defined by "entry" (by
          * default, false).
          */
@@ -413,24 +427,14 @@ declare module GameStartr {
         screenVariables?: MapScreenr.IVariableFunctions;
 
         /**
-         * Function for when a PreThing is to be spawned.
-         */
-        onSpawn: (prething: MapsCreatr.IPreThing) => void;
-
-        /**
-         * Function for when a PreThing is to be un-spawned.
-         */
-        onUnspawn: (prething: MapsCreatr.IPreThing) => void;
-
-        /**
          * If stretches exists, a Function to add stretches to an Area.
          */
-        stretchAdd: AreaSpawnr.ICommandAdder;
+        stretchAdd?: AreaSpawnr.ICommandAdder;
 
         /**
          * If afters exists, a Function to add afters to an Area.
          */
-        afterAdd: AreaSpawnr.ICommandAdder;
+        afterAdd?: AreaSpawnr.ICommandAdder;
 
         /**
          * Macro functions to create PreThings, keyed by String alias.
@@ -1323,12 +1327,18 @@ declare module GameStartr {
         onGamePause(GameStarter: IGameStartr): void;
 
         /**
-         * Checks whether inputs can be fired, which by default is always true.
+         * Triggered Function for when the game is closed.
          *
          * @param GameStartr
+         */
+        onGameClose(GameStarter: IGameStartr): void;
+
+        /**
+         * Checks whether inputs can be fired, which by default is always true.
+         *
          * @returns Whether inputs can be fired, which is always true.
          */
-        canInputsTrigger(GameStarter: IGameStartr): boolean;
+        canInputsTrigger(): boolean;
 
         /**
          * Generic Function to start the game. Nothing actually happens here.
@@ -2126,6 +2136,7 @@ module GameStartr {
                         "scope": GameStarter,
                         "onPlay": GameStarter.onGamePlay.bind(GameStarter, GameStarter),
                         "onPause": GameStarter.onGamePause.bind(GameStarter, GameStarter),
+                        "onClose": GameStarter.onGameClose.bind(GameStartr, GameStarter),
                         "FPSAnalyzer": new FPSAnalyzr.FPSAnalyzr()
                     },
                     GameStarter.settings.runner));
@@ -2245,7 +2256,7 @@ module GameStartr {
             GameStarter.InputWriter = new InputWritr.InputWritr(
                 GameStarter.proliferate(
                     {
-                        "canTrigger": GameStarter.canInputsTrigger.bind(GameStarter, GameStarter),
+                        "canTrigger": GameStarter.canInputsTrigger.bind(GameStarter),
                         "eventInformation": GameStarter
                     },
                     GameStarter.settings.input.InputWritrArgs));
@@ -2722,12 +2733,20 @@ module GameStartr {
         }
 
         /**
-         * Checks whether inputs can be fired, which by default is always true.
+         * Triggered Function for when the game is closed.
          * 
          * @param GameStartr
+         */
+        onGameClose(GameStarter: GameStartr): void {
+            GameStarter.ModAttacher.fireEvent("onGameClose");
+        }
+
+        /**
+         * Checks whether inputs can be fired, which by default is always true.
+         * 
          * @returns Whether inputs can be fired, which is always true.
          */
-        canInputsTrigger(GameStarter: GameStartr): boolean {
+        canInputsTrigger(): boolean {
             return true;
         }
 

@@ -9,6 +9,7 @@ FullScreenPokemon.FullScreenPokemon.settings.maps.library["Route 22"] = {
     },
     "areas": {
         "Land": {
+            "allowCycling": true,
             "width": 320,
             "height": 144,
             "wildPokemon": {
@@ -28,7 +29,32 @@ FullScreenPokemon.FullScreenPokemon.settings.maps.library["Route 22"] = {
                     "title": ["N", "I", "D", "O", "R", "A", "N", "MaleSymbol"],
                     "levels": [3, 4],
                     "rate": .05
-                }]
+                }],
+                "fishing": {
+                    "old": [{
+                        "title": "MAGIKARP".split(""),
+                        "levels": [5],
+                        "rate": 1
+                    }],
+                    "good": [{
+                        "title": "POLIWAG".split(""),
+                        "levels": [10],
+                        "rate": .5
+                    }, {
+                        "title": "GOLDEEN".split(""),
+                        "levels": [10],
+                        "rate": .5
+                    }],
+                    "super": [{
+                        "title": "POLIWAG".split(""),
+                        "levels": [15],
+                        "rate": .5
+                    }, {
+                        "title": "GOLDEEN".split(""),
+                        "levels": [15],
+                        "rate": .5
+                    }]
+                }
             },
             "creation": [
                 { "thing": "AreaSpawner", "x": 320, "height": 320, "map": "Viridian City", "area": "Land", "direction": 1, "offsetY": -64 },
@@ -85,7 +111,7 @@ FullScreenPokemon.FullScreenPokemon.settings.maps.library["Route 22"] = {
                 { "thing": "Ledge", "x": 272, "y": 108, "width": 32 },
                 { "thing": "BrickRoad", "x": 16, "y": 112, "width": 288, "height": 16 },
                 { "thing": "Mountain", "y": 128, "width": 16, "height": 16 },
-                { "thing": "Mountain", "x": 16, "y": 128, "width": 288, "height": 16, "top": true },
+                { "macro": "Mountain", "x": 16, "y": 128, "width": 288, "height": 16, "top": true },
                 { "thing": "Mountain", "x": 304, "y": 128, "width": 16, "height": 16 }
             ]
         }

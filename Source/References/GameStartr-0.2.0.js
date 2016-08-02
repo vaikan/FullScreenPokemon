@@ -228,6 +228,7 @@ var GameStartr;
                 "scope": GameStarter,
                 "onPlay": GameStarter.onGamePlay.bind(GameStarter, GameStarter),
                 "onPause": GameStarter.onGamePause.bind(GameStarter, GameStarter),
+                "onClose": GameStarter.onGameClose.bind(GameStartr, GameStarter),
                 "FPSAnalyzer": new FPSAnalyzr.FPSAnalyzr()
             }, GameStarter.settings.runner));
             GameStarter.FPSAnalyzer = GameStarter.GamesRunner.getFPSAnalyzer();
@@ -330,7 +331,7 @@ var GameStartr;
          */
         GameStartr.prototype.resetInputWriter = function (GameStarter, settings) {
             GameStarter.InputWriter = new InputWritr.InputWritr(GameStarter.proliferate({
-                "canTrigger": GameStarter.canInputsTrigger.bind(GameStarter, GameStarter),
+                "canTrigger": GameStarter.canInputsTrigger.bind(GameStarter),
                 "eventInformation": GameStarter
             }, GameStarter.settings.input.InputWritrArgs));
         };
@@ -704,12 +705,19 @@ var GameStartr;
             GameStarter.ModAttacher.fireEvent("onGamePause");
         };
         /**
-         * Checks whether inputs can be fired, which by default is always true.
+         * Triggered Function for when the game is closed.
          *
          * @param GameStartr
+         */
+        GameStartr.prototype.onGameClose = function (GameStarter) {
+            GameStarter.ModAttacher.fireEvent("onGameClose");
+        };
+        /**
+         * Checks whether inputs can be fired, which by default is always true.
+         *
          * @returns Whether inputs can be fired, which is always true.
          */
-        GameStartr.prototype.canInputsTrigger = function (GameStarter) {
+        GameStartr.prototype.canInputsTrigger = function () {
             return true;
         };
         /**

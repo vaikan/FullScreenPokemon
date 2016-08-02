@@ -6,8 +6,23 @@ module FullScreenPokemon {
 
     FullScreenPokemon.settings.math = {
         "equations": {
+            "averageLevel": function (constants: IMathConstants, equations: IMathEquations, actors: IPokemon[]): number {
+                let average: number = 0;
+
+                for (let i: number = 0; i < actors.length; i += 1) {
+                    average += actors[i].level;
+                }
+
+                return Math.round(average / actors.length);
+            },
+            "speedCycling": function (constants: IMathConstants, equations: IMathEquations, thing: ICharacter): number {
+                return thing.speed * 2;
+            },
+            "speedWalking": function (constants: IMathConstants, equations: IMathEquations, thing: ICharacter): number {
+                return Math.round(8 * thing.FSP.unitsize / thing.speed);
+            },
             "newPokemon": function (constants: IMathConstants, equations: IMathEquations, title: string[], level?: number, moves?: BattleMovr.IMove[], iv?: number, ev?: number): IPokemon {
-                var statisticNames: string[] = constants.statisticNames,
+                let statisticNames: string[] = constants.statisticNames,
                     pokemon: any = {
                         "title": title,
                         "nickname": title,
@@ -18,13 +33,11 @@ module FullScreenPokemon {
                         "IV": iv || this.compute("newPokemonIVs"),
                         "EV": ev || this.compute("newPokemonEVs"),
                         "experience": this.compute("newPokemonExperience", title, level || 1)
-                    },
-                    i: number;
+                    };
 
-                for (i = 0; i < statisticNames.length; i += 1) {
+                for (let i: number = 0; i < statisticNames.length; i += 1) {
                     pokemon[statisticNames[i]] = this.compute(
-                        "pokemonStatistic", pokemon, statisticNames[i]
-                    );
+                        "pokemonStatistic", pokemon, statisticNames[i]);
                     pokemon[statisticNames[i] + "Normal"] = pokemon[statisticNames[i]];
                 }
 
@@ -32,12 +45,11 @@ module FullScreenPokemon {
             },
             // http://bulbapedia.bulbagarden.net/wiki/XXXXXXX_(Pok%C3%A9mon)/Generation_I_learnset
             "newPokemonMoves": function (constants: IMathConstants, equations: IMathEquations, title: string[], level: number): BattleMovr.IMove[] {
-                var possibilities: IPokemonMoveListing[] = constants.pokemon[title.join("")].moves.natural,
+                let possibilities: IPokemonMoveListing[] = constants.pokemon[title.join("")].moves.natural,
                     output: BattleMovr.IMove[] = [],
                     move: IPokemonMoveListing,
                     newMove: BattleMovr.IMove,
-                    end: number,
-                    i: number;
+                    end: number;
 
                 for (end = 0; end < possibilities.length; end += 1) {
                     if (possibilities[end].level > level) {
@@ -45,7 +57,7 @@ module FullScreenPokemon {
                     }
                 }
 
-                for (i = Math.max(end - 4, 0); i < end; i += 1) {
+                for (let i: number = Math.max(end - 4, 0); i < end; i += 1) {
                     move = possibilities[i];
                     newMove = {
                         "title": move.move,
@@ -59,7 +71,7 @@ module FullScreenPokemon {
             },
             // http://bulbapedia.bulbagarden.net/wiki/Individual_values
             "newPokemonIVs": function (constants: IMathConstants, equations: IMathEquations): { [i: string]: number } {
-                var attack: number = constants.NumberMaker.randomIntWithin(0, 15),
+                let attack: number = constants.NumberMaker.randomIntWithin(0, 15),
                     defense: number = constants.NumberMaker.randomIntWithin(0, 15),
                     speed: number = constants.NumberMaker.randomIntWithin(0, 15),
                     special: number = constants.NumberMaker.randomIntWithin(0, 15),
@@ -88,7 +100,7 @@ module FullScreenPokemon {
                 };
             },
             "newPokemonExperience": function (constants: IMathConstants, equations: IMathEquations, title: string[], level: number): IExperience {
-                var current: number = this.compute("experienceStarting", title, level),
+                let current: number = this.compute("experienceStarting", title, level),
                     next: number = this.compute("experienceStarting", title, level + 1);
 
                 return {
@@ -100,20 +112,19 @@ module FullScreenPokemon {
             // http://bulbapedia.bulbagarden.net/wiki/Individual_values
             // Note: the page mentions rounding errors... 
             "pokemonStatistic": function (constants: IMathConstants, equations: IMathEquations, pokemon: IPokemon, statistic: string): number {
-                var topExtra: number = 0,
+                let topExtra: number = 0,
                     added: number = 5,
                     base: number = constants.pokemon[pokemon.title.join("")][statistic],
                     iv: number = pokemon.IV[statistic] || 0,
                     ev: number = pokemon.EV[statistic] || 0,
-                    level: number = pokemon.level,
-                    numerator: number;
+                    level: number = pokemon.level;
 
                 if (statistic === "HP") {
                     topExtra = 50;
                     added = 10;
                 }
 
-                numerator = (iv + base + (Math.sqrt(ev) / 8) + topExtra) * level;
+                let numerator: number = (iv + base + (Math.sqrt(ev) / 8) + topExtra) * level;
 
                 return (numerator / 50 + added) | 0;
             },
@@ -123,17 +134,13 @@ module FullScreenPokemon {
             },
             // http://bulbapedia.bulbagarden.net/wiki/Catch_rate#Capture_method_.28Generation_I.29
             "canCatchPokemon": function (constants: IMathConstants, equations: IMathEquations, pokemon: IPokemon, ball: IBattleBall): boolean {
-                var n: number,
-                    m: number,
-                    f: number;
-
                 // 1. If a Master Ball is used, the Pokemon is caught.
                 if (ball.type === "Master") {
                     return true;
                 }
 
                 // 2. Generate a random number, N, depending on the type of ball used.
-                n = constants.NumberMaker.randomInt(ball.probabilityMax);
+                let n: number = constants.NumberMaker.randomInt(ball.probabilityMax);
 
                 // 3. The Pokemon is caught if...
                 if (pokemon.status) { // ... it is asleep or frozen and N is less than 25.
@@ -154,23 +161,25 @@ module FullScreenPokemon {
                 }
 
                 // 5. If not, generate a random value, M, between 0 and 255.
-                m = constants.NumberMaker.randomInt(255);
+                let m: number = constants.NumberMaker.randomInt(255);
 
                 // 6. Calculate f.
-                f = Math.max(
+                let f: number = Math.max(
                     Math.min(
                         (pokemon.HPNormal * 255 * 4) | 0 / (pokemon.HP * ball.rate) | 0,
-                        255
-                    ),
-                    1
-                );
+                        255),
+                    1);
 
                 // 7. If f is greater than or equal to M, the Pokemon is caught. Otherwise, the Pokemon breaks free.
                 return f > m;
             },
+            // @todo Add functionality.
+            "canLandFish": function (constants: IMathConstants, equations: IMathEquations): boolean {
+                return true;
+            },
             // http://bulbapedia.bulbagarden.net/wiki/Escape#Generation_I_and_II
             "canEscapePokemon": function (constants: IMathConstants, equations: IMathEquations, pokemon: IPokemon, enemy: IPokemon, battleInfo: IBattleInfo): boolean {
-                var a: number = pokemon.Speed,
+                let a: number = pokemon.Speed,
                     b: number = (enemy.Speed / 4) % 256,
                     c: number = battleInfo.currentEscapeAttempts,
                     f: number = (a * 32) / b + 30 * c;
@@ -184,9 +193,7 @@ module FullScreenPokemon {
             // http://bulbapedia.bulbagarden.net/wiki/Catch_rate#Capture_method_.28Generation_I.29
             "numBallShakes": function (constants: IMathConstants, equations: IMathEquations, pokemon: IPokemon, ball: IBattleBall): number {
                 // 1. Calculate d.
-                var d: number = pokemon.catchRate * 100 / ball.rate,
-                    f: number,
-                    x: number;
+                let d: number = pokemon.catchRate * 100 / ball.rate;
 
                 // 2. If d is greater than or equal to 256, the ball shakes three times before the Pokemon breaks free.
                 if (d >= 256) {
@@ -194,36 +201,41 @@ module FullScreenPokemon {
                 }
 
                 // 3. If not, calculate x = d * f / 255 + s, where s is 10 if the Pokemon is asleep or frozen or 5 if it is paralyzed, poisoned, or burned.
-                f = Math.max(
+                let f: number = Math.max(
                     Math.min(
                         (pokemon.HPNormal * 255 * 4) | 0 / (pokemon.HP * ball.rate) | 0,
                         255),
                     1);
-                x = d * f / 255 + constants.statuses.shaking[pokemon.status];
+                let x: number = d * f / 255 + constants.statuses.shaking[pokemon.status];
 
                 // 4. If... 
                 if (x < 10) { // x < 10: the Ball misses the Pokemon completely.
                     return 0;
-                } else if (x < 30) { // x < 30: the Ball shakes once before the Pokemon breaks free.
-                    return 1;
-                } else if (x < 70) { // x < 70: the Ball shakes twice before the Pokemon breaks free.
-                    return 2;
-                } else { // Otherwise, the Ball shakes three times before the Pokemon breaks free.
-                    return 3;
                 }
+
+                // x < 30: the Ball shakes once before the Pokemon breaks free.
+                if (x < 30) {
+                    return 1;
+                }
+
+                // x < 70: the Ball shakes twice before the Pokemon breaks free.
+                if (x < 70) {
+                    return 2;
+                }
+
+                // Otherwise, the Ball shakes three times before the Pokemon breaks free.
+                return 3;
             },
             // http://wiki.pokemonspeedruns.com/index.php/Pok%C3%A9mon_Red/Blue/Yellow_Trainer_AI
             // TO DO: Also filter for moves with > 0 remaining remaining...
             "opponentMove": function (constants: IMathConstants, equations: IMathEquations, player: IBattleThingInfo, opponent: IBattleThingInfo): string {
-                var possibilities: IMovePossibility[] = opponent.selectedActor.moves.map(
+                let possibilities: IMovePossibility[] = opponent.selectedActor.moves.map(
                     function (move: BattleMovr.IMove): IMovePossibility {
                         return {
                             "move": move.title,
                             "priority": 10
                         };
-                    }),
-                    lowest: number,
-                    i: number;
+                    });
 
                 // Wild Pokemon just choose randomly
                 if (opponent.category === "Wild") {
@@ -232,7 +244,7 @@ module FullScreenPokemon {
 
                 // Modification 1: Do not use a move that only statuses (e.g. Thunder Wave) if the player's pokémon already has a status.
                 if (player.selectedActor.status && !opponent.dumb) {
-                    for (i = 0; i < possibilities.length; i += 1) {
+                    for (let i: number = 0; i < possibilities.length; i += 1) {
                         if (this.compute("moveOnlyStatuses", possibilities[i].move)) {
                             possibilities[i].priority += 5;
                         }
@@ -240,10 +252,10 @@ module FullScreenPokemon {
                 }
 
                 // Modification 2: On the second turn the pokémon is out, prefer a move with one of the following effects...
-                if (this.compute("opponentMatchesTypes", opponent, constants.battleModifications["Turn 2"])) {
-                    for (i = 0; i < possibilities.length; i += 1) {
+                if (this.compute("pokemonMatchesTypes", opponent, constants.battleModifications["Turn 2"])) {
+                    for (let i: number = 0; i < possibilities.length; i += 1) {
                         this.compute(
-                            "applyMoveEffectPrority",
+                            "applyMoveEffectPriority",
                             possibilities[i],
                             constants.battleModifications["Turn 2"],
                             player.selectedActor,
@@ -252,10 +264,10 @@ module FullScreenPokemon {
                 }
 
                 // Modification 3 (Good AI): Prefer a move that is super effective. Do not use moves that are not very effective as long as there is an alternative.
-                if (this.compute("opponentMatchesTypes", opponent, constants.battleModifications["Good AI"])) {
-                    for (i = 0; i < possibilities.length; i += 1) {
+                if (this.compute("pokemonMatchesTypes", opponent, constants.battleModifications["Good AI"])) {
+                    for (let i: number = 0; i < possibilities.length; i += 1) {
                         this.compute(
-                            "applyMoveEffectPrority",
+                            "applyMoveEffectPriority",
                             possibilities[i],
                             constants.battleModifications["Good AI"],
                             player.selectedActor,
@@ -264,9 +276,9 @@ module FullScreenPokemon {
                 }
 
                 // The AI uses rejection sampling on the four moves with ratio 63:64:63:66, with only the moves that are most favored after applying the modifications being acceptable.
-                lowest = possibilities[0].priority;
+                let lowest: number = possibilities[0].priority;
                 if (possibilities.length > 1) {
-                    for (i = 1; i < possibilities.length; i += 1) {
+                    for (let i: number = 1; i < possibilities.length; i += 1) {
                         if (possibilities[i].priority < lowest) {
                             lowest = possibilities[i].priority;
                         }
@@ -278,9 +290,9 @@ module FullScreenPokemon {
 
                 return constants.NumberMaker.randomArrayMember(possibilities).move;
             },
-            "opponentMatchesTypes": function (constants: IMathConstants, equations: IMathEquations, opponent: IPokemon, types: string[]): boolean {
-                for (var i: number = 0; i < types.length; i += 1) {
-                    if (opponent.types.indexOf(types[i]) !== -1) {
+            "pokemonMatchesTypes": function (constants: IMathConstants, equations: IMathEquations, pokemon: IPokemon, types: string[]): boolean {
+                for (let i: number = 0; i < types.length; i += 1) {
+                    if (pokemon.types.indexOf(types[i]) !== -1) {
                         return true;
                     }
                 }
@@ -290,14 +302,12 @@ module FullScreenPokemon {
             "moveOnlyStatuses": function (constants: IMathConstants, equations: IMathEquations, move: IMoveSchema): boolean {
                 return move.damage === "Non-Damaging" && move.effect === "Status";
             },
-            "applyMoveEffectPrority": function (constants: IMathConstants, equations: IMathEquations, possibility: IMovePossibility, modification: IBattleModification, target: IPokemon, amount: number): void {
-                var preferences: ([string, string, number] | [string, string])[] = modification.preferences,
-                    move: IMoveSchema = constants.moves[possibility.move],
-                    preference: [string, string, number] | [string, string],
-                    i: number;
+            "applyMoveEffectPriority": function (constants: IMathConstants, equations: IMathEquations, possibility: IMovePossibility, modification: IBattleModification, target: IPokemon, amount: number): void {
+                let preferences: ([string, string, number] | [string, string])[] = modification.preferences,
+                    move: IMoveSchema = constants.moves[possibility.move];
 
-                for (i = 0; i < preferences.length; i += 1) {
-                    preference = preferences[i];
+                for (let i: number = 0; i < preferences.length; i += 1) {
+                    let preference: [string, string, number] | [string, string] = preferences[i];
 
                     switch (preference[0]) {
                         // ["Move", String]
@@ -371,7 +381,7 @@ module FullScreenPokemon {
             // TO DO: Account for items, switching, etc.
             // TO DO: Factor in spec differences from paralyze, etc.
             "playerMovesFirst": function (constants: IMathConstants, equations: IMathEquations, player: IBattleThingInfo, choicePlayer: string, opponent: IBattleThingInfo, choiceOpponent: string): boolean {
-                var movePlayer: IMoveSchema = constants.moves[choicePlayer],
+                let movePlayer: IMoveSchema = constants.moves[choicePlayer],
                     moveOpponent: IMoveSchema = constants.moves[choiceOpponent];
 
                 if (movePlayer.priority === moveOpponent.priority) {
@@ -384,7 +394,7 @@ module FullScreenPokemon {
             // http://bulbapedia.bulbagarden.net/wiki/Critical_hit
             // TO DO: Factor in spec differences from burns, etc.
             "damage": function (constants: IMathConstants, equations: IMathEquations, move: string, attacker: IPokemon, defender: IPokemon): number {
-                var base: string | number = constants.moves[move].power;
+                let base: string | number = constants.moves[move].power;
 
                 // A base attack that's not numeric means no damage, no matter what
                 if (!base || isNaN(<number>base)) {
@@ -396,7 +406,7 @@ module FullScreenPokemon {
                     return Infinity;
                 }
 
-                var critical: boolean = this.compute("criticalHit", move, attacker),
+                let critical: boolean = this.compute("criticalHit", move, attacker),
                     level: number = attacker.level * Number(critical),
                     attack: number = attacker.Attack,
                     defense: number = defender.Defense,
@@ -405,21 +415,19 @@ module FullScreenPokemon {
                 return Math.round(
                     Math.max(
                         ((((2 * level + 10) / 250) * (attack / defense) * <number>base + 2) | 0) * modifier,
-                        1
-                    )
-                );
+                        1));
             },
             // http://bulbapedia.bulbagarden.net/wiki/Damage#Damage_formula
             // http://bulbapedia.bulbagarden.net/wiki/Critical_hit
             "damageModifier": function (constants: IMathConstants, equations: IMathEquations, move: IMoveSchema, critical: boolean, attacker: IPokemon, defender: IPokemon): number {
-                var stab: number = attacker.types.indexOf(move.type) !== -1 ? 1.5 : 1,
+                let stab: number = attacker.types.indexOf(move.type) !== -1 ? 1.5 : 1,
                     type: number = this.compute("typeEffectiveness", move, defender);
 
                 return stab * type * constants.NumberMaker.randomWithin(.85, 1);
             },
             // http://bulbapedia.bulbagarden.net/wiki/Critical_hit
             "criticalHit": function (constants: IMathConstants, equations: IMathEquations, move: string, attacker: IPokemon): boolean {
-                var moveInfo: IMoveSchema = constants.moves[move],
+                let moveInfo: IMoveSchema = constants.moves[move],
                     baseSpeed: number = constants.pokemon[attacker.title.join("")].Speed,
                     denominator: number = 512;
 
@@ -442,12 +450,11 @@ module FullScreenPokemon {
             },
             // http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart#Generation_I
             "typeEffectiveness": function (constants: IMathConstants, equations: IMathEquations, move: string, defender: IPokemon): number {
-                var defenderTypes: string[] = constants.pokemon[defender.title.join("")].types,
+                let defenderTypes: string[] = constants.pokemon[defender.title.join("")].types,
                     moveIndex: number = constants.types.indices[constants.moves[move].type],
-                    total: number = 1,
-                    i: number;
+                    total: number = 1;
 
-                for (i = 0; i < defenderTypes.length; i += 1) {
+                for (let i: number = 0; i < defenderTypes.length; i += 1) {
                     total *= constants.types.table[moveIndex][constants.types.indices[defenderTypes[i]]];
                 }
 
@@ -456,7 +463,7 @@ module FullScreenPokemon {
             // http://m.bulbapedia.bulbagarden.net/wiki/Experience#Relation_to_level
             // Wild Pokémon of any level will always have the base amount of experience required to reach that level when caught, as will Pokémon hatched from Eggs.
             "experienceStarting": function (constants: IMathConstants, equations: IMathEquations, title: string[], level: number): number {
-                var reference: IPokemonListing = constants.pokemon[title.join("")];
+                let reference: IPokemonListing = constants.pokemon[title.join("")];
 
                 // TODO: remove defaulting to mediumFast
                 switch (reference.experienceType) {
@@ -477,31 +484,21 @@ module FullScreenPokemon {
             },
             // http://bulbapedia.bulbagarden.net/wiki/Experience#Gain_formula
             "experienceGained": function (constants: IMathConstants, equations: IMathEquations, player: IBattleThingInfo, opponent: IBattleThingInfo): number {
-                var a: number,
-                    b: number,
-                    lf: number,
-                    s: number,
-                    t: number;
-
                 // a is equal to 1 if the fainted Pokemon is wild, or 1.5 if the fainted Pokemon is owned by a Trainer
-                a = opponent.category === "Trainer" ? 1.5 : 1;
+                let a: number = opponent.category === "Trainer" ? 1.5 : 1;
 
                 // b is the base experience yield of the fainted Pokemon's species
-                b = 64; // (Bulbasaur) TO DO: add this in
+                let b: number = 64; // (Bulbasaur) TO DO: add this in
 
                 // lf is the level of the fainted Pokemon
-                lf = opponent.selectedActor.level;
+                let lf: number = opponent.selectedActor.level;
 
                 // s is equal to (in Gen I), if Exp. All is not in the player's Bag...
                 // TO DO: Account for modifies like Exp. All
-                s = 1;
+                let s: number = 1;
 
                 // t is equal to 1 if the winning Pokemon's curent owner is its OT, or 1.5 if the Pokemon was gained in a domestic trade
-                if (player.selectedActor.traded) {
-                    t = 1.5;
-                } else {
-                    t = 1;
-                }
+                let t: number = player.selectedActor.traded ? 1.5 : 1;
 
                 return (((a * t * b * lf) | 0) / ((7 * s) | 0)) | 0;
             },
@@ -548,46 +545,7 @@ module FullScreenPokemon {
                 "Viridian City": [18, 36]
             },
             /**
-             * Run on http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart#Generation_I
-             * 
-             * console.clear();
-             * 
-             * var table = $($("table")[2]),
-             *     names = table.find("tr:nth-of-type(2) a")
-             *         .toArray()
-             *         .map(function (a) {
-             *             return a.getAttribute("title"); 
-             *         }),
-             *     chart = table.find("tr:nth-of-type(2) ~ tr"),
-             *     table = [],
-             *     indices = {},
-             *     values = {
-             *         "0×": 0.0,
-             *         "½×": .5,
-             *         "1×": 1.0,
-             *         "2×": 2.0
-             *     },
-             *     output = { 
-             *         "names": names, 
-             *         "table": table
-             *     },
-             *     row, i, j;
-             * 
-             * for (i = 0; i < names.length; i += 1) {
-             *     indices[names[i]] = i;
-             * }
-             * 
-             * for (i = 0; i < chart.length - 1; i += 1) {
-             *     row = chart[i];
-             *     table.push([]);
-             *     for (j = 0; j < row.cells.length - 1; j += 1) {
-             *         table[i].push(values[row.cells[j + 1].innerText])
-             *     }
-             * }
-             * 
-             * table[0].shift();
-             * 
-             * JSON.stringify(output);
+             * @see http://bulbapedia.bulbagarden.net/wiki/Type/Type_chart#Generation_I
              */
             "types": {
                 "names": ["Normal", "Fighting", "Flying", "Poison", "Ground", "Rock", "Bug", "Ghost", "Fire", "Water", "Grass", "Electric", "Psychic", "Ice", "Dragon"],
@@ -627,29 +585,7 @@ module FullScreenPokemon {
                 ]
             },
             /**
-             * Run on http://www.smogon.com/dex/rb/pokemon/
-             * 
-             * var output = {};
-             * 
-             * Array.prototype.slice.call(document.querySelectorAll("tr")).forEach(function (row) {
-             *     output[row.children[0].innerText.trim().toUpperCase()] = {
-             *         "types": row.children[1].innerText
-             *             .split(/\s+/g)
-             *             .filter(function (str) { 
-             *                 return str; 
-             *             })
-             *             .map(function (str) { 
-             *                 return str.trim();
-             *             }),
-             *         "HP": Number(row.children[5].innerText.split(/\s+/g)[1]),
-             *         "Attack": Number(row.children[6].innerText.split(/\s+/g)[1]),
-             *         "Defense": Number(row.children[7].innerText.split(/\s+/g)[1]),
-             *         "Special": Number(row.children[8].innerText.split(/\s+/g)[1]),
-             *         "Speed": Number(row.children[10].innerText.split(/\s+/g)[1]),
-             *     };
-             * });
-             * 
-             * JSON.stringify(output);
+             * @see http://www.smogon.com/dex/rb/pokemon/
              */
             "pokemon": {
                 "ABRA": {
@@ -9573,51 +9509,38 @@ module FullScreenPokemon {
                     "moves": {
                         "natural": [
                             {
-                                "move": "Toxic",
-                                "level": 6
-                            }, {
-                                "move": "Body Slam",
+                                "move": "Growl",
+                                "level": 1
+                            },
+                            {
+                                "move": "Tackle",
+                                "level": 1
+                            },
+                            {
+                                "move": "Scratch",
                                 "level": 8
-                            }, {
-                                "move": "Take Down",
-                                "level": 9
-                            }, {
-                                "move": "Double-Edge",
-                                "level": 10
-                            }, {
-                                "move": "Blizzard",
-                                "level": 14
-                            }, {
-                                "move": "Rage",
-                                "level": 20
-                            }, {
-                                "move": "Thunderbolt",
-                                "level": 24
-                            }, {
-                                "move": "Thunder",
-                                "level": 25
-                            }, {
-                                "move": "Mimic",
-                                "level": 31
-                            }, {
-                                "move": "Double Team",
-                                "level": 32
-                            }, {
-                                "move": "Reflect",
-                                "level": 33
-                            }, {
-                                "move": "Bide",
-                                "level": 34
-                            }, {
-                                "move": "Skull Bash",
-                                "level": 40
-                            }, {
-                                "move": "Rest",
-                                "level": 44
-                            }, {
-                                "move": "Substitute",
-                                "level": 50
-                            }],
+                            },
+                            {
+                                "move": "Double Kick",
+                                "level": 12
+                            },
+                            {
+                                "move": "Poison Sting",
+                                "level": 17
+                            },
+                            {
+                                "move": "Tail Whip",
+                                "level": 23
+                            },
+                            {
+                                "move": "Bite",
+                                "level": 30
+                            },
+                            {
+                                "move": "Fury Swipes",
+                                "level": 38
+                            },
+                        ],
                         "hm": [
                             {
                                 "move": "Toxic",
@@ -16054,13 +15977,16 @@ module FullScreenPokemon {
                     "PP": 10,
                     "description": "High critical hit rate."
                 },
-                "Cut": {
+                "Cut": <IHMMoveSchema>{
                     "type": "Normal",
                     "damage": "Physical",
                     "power": 50,
                     "accuracy": "95%",
                     "PP": 30,
-                    "description": "No additional effect."
+                    "description": "No additional effect.",
+                    "partyActivate": FullScreenPokemon.prototype.partyActivateCut,
+                    "characterName": "CuttableTree",
+                    "requiredBadge": "Cascade"
                 },
                 "Defense Curl": {
                     "type": "Normal",
@@ -16222,21 +16148,23 @@ module FullScreenPokemon {
                     "PP": 15,
                     "description": "10% chance to burn the target."
                 },
-                "Flash": {
+                "Flash": <IHMMoveSchema>{
                     "type": "Normal",
                     "damage": "Non-Damaging",
                     "power": "-",
                     "accuracy": "70%",
                     "PP": 20,
-                    "description": "Lowers the target's accuracy by one stage."
+                    "description": "Lowers the target's accuracy by one stage.",
+                    "requiredBadge": "Boulder"
                 },
-                "Fly": {
+                "Fly": <IHMMoveSchema>{
                     "type": "Flying",
                     "damage": "Physical",
                     "power": 70,
                     "accuracy": "95%",
                     "PP": 15,
-                    "description": "User is made invulnerable for one turn, then hits the next turn."
+                    "description": "User is made invulnerable for one turn, then hits the next turn.",
+                    "requiredBadge": "Thunder"
                 },
                 "Focus Energy": {
                     "type": "Normal",
@@ -16912,13 +16840,16 @@ module FullScreenPokemon {
                     "PP": 20,
                     "description": "30% chance of causing the target to flinch."
                 },
-                "Strength": {
+                "Strength": <IHMMoveSchema>{
                     "type": "Normal",
                     "damage": "Physical",
                     "power": 80,
                     "accuracy": "100%",
                     "PP": 15,
-                    "description": "No additional effect."
+                    "description": "No additional effect.",
+                    "partyActivate": FullScreenPokemon.prototype.partyActivateStrength,
+                    "characterName": "StrengthBoulder",
+                    "requiredBadge": "Rainbow"
                 },
                 "String Shot": {
                     "type": "Bug",
@@ -16976,13 +16907,16 @@ module FullScreenPokemon {
                     "PP": 20,
                     "description": "Confuses the target."
                 },
-                "Surf": {
+                "Surf": <IHMMoveSchema>{
                     "type": "Water",
                     "damage": "Special",
                     "power": 95,
                     "accuracy": "100%",
                     "PP": 15,
-                    "description": "No additional effect."
+                    "description": "No additional effect.",
+                    "partyActivate": FullScreenPokemon.prototype.partyActivateSurf,
+                    "characterName": "WaterEdge",
+                    "requiredBadge": "Soul"
                 },
                 "Swift": {
                     "type": "Normal",
@@ -17422,7 +17356,9 @@ module FullScreenPokemon {
                 },
                 "Bicycle": {
                     "effect": "Allows travel at double speed",
-                    "category": "Key"
+                    "category": "Key",
+                    "error": "No cycling allowed here.",
+                    "bagActivate": FullScreenPokemon.prototype.toggleCycling
                 },
                 "Bike Voucher": {
                     "effect": "Redeem at Cerulean Bike Shop for a free Bicycle",
@@ -17448,9 +17384,12 @@ module FullScreenPokemon {
                     "effect": "Return to Safari Zone Warden and receive HM04",
                     "category": "Key"
                 },
-                "Good Rod": {
+                "Good Rod": <IRod> {
                     "effect": "Fish for medium-levelled water Pokemon",
-                    "category": "Key"
+                    "category": "Key",
+                    "bagActivate": FullScreenPokemon.prototype.startFishing,
+                    "title": "Good Rod",
+                    "type": "good"
                 },
                 "Helix Fossil": {
                     "effect": "Used to clone Omanyte at the Cinnabar Island Laboratory",
@@ -17472,9 +17411,12 @@ module FullScreenPokemon {
                     "effect": "Used to clone Aerodactyl at the Cinnabar Island Laboratoy",
                     "category": "Key"
                 },
-                "Old Rod": {
+                "Old Rod": <IRod>{
                     "effect": "Fish for low-levelled water Pokemon",
-                    "category": "Key"
+                    "category": "Key",
+                    "bagActivate": FullScreenPokemon.prototype.startFishing,
+                    "title": "Old Rod",
+                    "type": "old"
                 },
                 "Pokeflute": {
                     "effect": "Awakens sleeping Pokemon",
@@ -17496,9 +17438,12 @@ module FullScreenPokemon {
                     "effect": "Allows Ghosts to be detected in the Pokemon Tower, Lavendar Town",
                     "category": "Key"
                 },
-                "Super Rod": {
+                "Super Rod": <IRod>{
                     "effect": "Fish for high-levelled water Pokemon",
-                    "category": "Key"
+                    "category": "Key",
+                    "bagActivate": FullScreenPokemon.prototype.startFishing,
+                    "title": "Super Rod",
+                    "type": "super"
                 },
                 "Town Map": {
                     "effect": "Shows your position in the Pokemon World",

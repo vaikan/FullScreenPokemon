@@ -14,17 +14,23 @@ module.exports = function (grunt) {
             },
             "files": {
                 "src": [
-                    "<%= meta.paths.source %>/<%= pkg.name %>.ts",
+                    "<%= meta.paths.source %>/*.ts",
                     "<%= meta.paths.source %>/settings/*.ts",
                 ]
             }
         },
         "typescript": {
             "base": {
-                "src": "<%= meta.paths.source %>/<%= pkg.name %>.ts"
+                "src": [
+                    "<%= meta.paths.source %>/<%= pkg.name %>.ts",
+                    "<%= meta.paths.source %>/settings/**/*.ts"
+                ]
             },
             "distribution": {
-                "src": "<%= meta.paths.source %>/<%= pkg.name %>.ts",
+                "src": [
+                    "<%= meta.paths.source %>/<%= pkg.name %>.ts",
+                    "<%= meta.paths.source %>/settings/**/*.ts"
+                ],
                 "dest": "<%= meta.paths.dist %>/<%= pkg.name %>-<%= pkg.version %>.js"
             }
         },
@@ -157,5 +163,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-zip");
     grunt.registerTask("default", [
         "clean", "tslint", "typescript", "copy", "uglify", "cssmin", "preprocess", "processhtml", "htmlmin", "mocha_phantomjs", "zip"
+    ]);
+    grunt.registerTask("quick", [
+        "clean", "tslint", "typescript"
     ]);
 };

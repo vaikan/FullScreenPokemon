@@ -21,7 +21,7 @@ module FullScreenPokemon {
             ".": "Period",
             ",": "Comma",
             "'": "Apostrophe",
-            "é": "eFancy"
+            "ï¿½": "eFancy"
         },
         "replacements": {
             "PLAYER": function (FSP: FullScreenPokemon): string[] {
@@ -30,12 +30,12 @@ module FullScreenPokemon {
             "RIVAL": function (FSP: FullScreenPokemon): string[] {
                 return FSP.ItemsHolder.getItem("nameRival");
             },
-            "POKE": "POKé".split(""),
-            "POKEMON": "POKéMON".split(""),
-            "POKEDEX": "POKéDEX".split(""),
+            "POKE": "POKï¿½".split(""),
+            "POKEMON": "POKï¿½MON".split(""),
+            "POKEDEX": "POKï¿½DEX".split(""),
             "POKEDEX.SEEN": function (FSP: FullScreenPokemon): string[] {
                 return FSP.makeDigit(
-                    FSP.getPokedexListingsOrdered(FSP)
+                    FSP.getPokedexListingsOrdered()
                         .filter(function (listing: IPokedexInformation): boolean {
                             return listing && listing.seen;
                         })
@@ -46,7 +46,7 @@ module FullScreenPokemon {
             },
             "POKEDEX.OWN": function (FSP: FullScreenPokemon): string[] {
                 return FSP.makeDigit(
-                    FSP.getPokedexListingsOrdered(FSP)
+                    FSP.getPokedexListingsOrdered()
                         .filter(function (listing: IPokedexInformation): boolean {
                             return listing && listing.caught;
                         })
@@ -56,11 +56,10 @@ module FullScreenPokemon {
                     .split("");
             },
             "BADGES.LENGTH": function (FSP: FullScreenPokemon): string[] {
-                var badges: { [i: string]: boolean } = FSP.ItemsHolder.getItem("badges"),
-                    total: number = 0,
-                    i: string;
+                let badges: { [i: string]: boolean } = FSP.ItemsHolder.getItem("badges"),
+                    total: number = 0;
 
-                for (i in badges) {
+                for (let i in badges) {
                     if (badges.hasOwnProperty(i)) {
                         total += Number(badges[i]);
                     }
@@ -69,8 +68,7 @@ module FullScreenPokemon {
                 return total.toString().split("");
             },
             "POKEDEX.LENGTH": function (FSP: FullScreenPokemon): string[] {
-                var pokedex: IPokedexListing[] = FSP.ItemsHolder.getItem("Pokedex");
-
+                let pokedex: IPokedexListing[] = FSP.ItemsHolder.getItem("Pokedex");
                 if (!pokedex || !pokedex.length) {
                     return ["0"];
                 }
@@ -86,7 +84,7 @@ module FullScreenPokemon {
                     .split("");
             },
             "TIME": function (FSP: FullScreenPokemon): string[] {
-                var ticksRecorded: number = FSP.ItemsHolder.getItem("time"),
+                let ticksRecorded: number = FSP.ItemsHolder.getItem("time"),
                     ticksUnrecorded: number = FSP.FPSAnalyzer.getNumRecorded() - FSP.ticksElapsed,
                     ticksTotal: number = Math.floor(ticksRecorded + ticksUnrecorded),
                     secondsTotal: number = Math.floor(ticksTotal / FSP.settings.runner.interval),
@@ -118,6 +116,9 @@ module FullScreenPokemon {
             "MONEY": true
         },
         "replaceFromItemsHolder": true,
+        "sounds": {
+            "menuSound": "Menu Bleep"
+        },
         "schemas": {
             "StartOptions": {
                 "size": {
@@ -209,7 +210,7 @@ module FullScreenPokemon {
                             }
                         }
                     },
-                    {
+                    <MenuGraphr.IMenuChildSchema>{
                         "type": "menu",
                         "name": "PokedexNumbers"
                     }],
@@ -255,7 +256,7 @@ module FullScreenPokemon {
                 "textSpeed": 0,
                 "textPaddingY": 4
             },
-            "PokedexOptions": {
+            "PokedexOptions": <MenuGraphr.IListMenuSchema>{
                 "size": {
                     "width": 21.5,
                     "height": 37
@@ -276,7 +277,7 @@ module FullScreenPokemon {
                 "textXOffset": 4,
                 "textYOffset": 5
             },
-            "PokedexListing": {
+            "PokedexListing": <any>{
                 "size": {
                     "width": 80,
                     "height": 72
@@ -1548,6 +1549,9 @@ module FullScreenPokemon {
                 "textSpeed": 0
             },
             "BattlePlayerHealthTitle": {
+                "size": {
+                    "width": 38
+                },
                 "position": {
                     "offset": {
                         "top": -12.5,

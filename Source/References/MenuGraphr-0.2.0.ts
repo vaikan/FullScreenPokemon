@@ -307,7 +307,7 @@ declare module MenuGraphr {
 
         /**
          * Whether this should have children not shifted vertically relative to the 
-         * menu top (used by list menus).
+         * menu top (used exclusively by list menus).
          */
         relative?: boolean;
 
@@ -495,24 +495,9 @@ declare module MenuGraphr {
     }
 
     /**
-     * A menu containing some number of options as cells in a grid.
+     * Base grid attributes for a list menu.
      */
-    export interface IListMenu extends IListMenuSchema, IMenu {
-        /**
-         * The arrow Thing indicating the current selection.
-         */
-        arrow: GameStartr.IThing;
-
-        /**
-         * A horizontal offset for the arrow Thing.
-         */
-        arrowXOffset?: number;
-
-        /**
-         * A vertical offset for the arrow Thing.
-         */
-        arrowYOffset?: number;
-
+    export interface IListMenuBase {
         /**
          * The grid of options, as columns containing rows.
          */
@@ -529,14 +514,39 @@ declare module MenuGraphr {
         gridRows: number;
 
         /**
-         * How tall this is.
-         */
-        height: number;
-
-        /**
          * All options available in the grid.
          */
         options: IGridCell[];
+
+        /**
+         * The currently selected [column, row] in the grid.
+         */
+        selectedIndex: [number, number];
+    }
+
+    /**
+     * A menu containing some number of options as cells in a grid.
+     */
+    export interface IListMenu extends IListMenuBase, IListMenuSchema, IMenu {
+        /**
+         * The arrow Thing indicating the current selection.
+         */
+        arrow: GameStartr.IThing;
+
+        /**
+         * A horizontal offset for the arrow Thing.
+         */
+        arrowXOffset?: number;
+
+        /**
+         * A vertical offset for the arrow Thing.
+         */
+        arrowYOffset?: number;
+
+        /**
+         * How tall this is.
+         */
+        height: number;
 
         /**
          * Descriptions of the options, with their grid cell and Things.
@@ -557,11 +567,6 @@ declare module MenuGraphr {
          * Whether the list should be a single column, rather than auto-flow.
          */
         singleColumnList: boolean;
-
-        /**
-         * The currently selected [column, row] in the grid.
-         */
-        selectedIndex: [number, number];
 
         /**
          * How wide each column of text should be in the grid.
@@ -687,7 +692,18 @@ declare module MenuGraphr {
     }
 
     /**
-     * Alternate Thing titles for characters, such as " " for "space".
+     * A list of sounds that should be played for certain menu actions.
+     */
+    export interface ISoundNames {
+        /**
+         * The sound to play, if any, when interacting with a menu (usually off the A 
+         * or B buttons being registered).
+         */
+        onInteraction?: string;
+    }
+
+    /**
+     * Alternate Thing titles for characters, such as " " to "space".
      */
     export interface IAliases {
         [i: string]: string;
@@ -725,6 +741,11 @@ declare module MenuGraphr {
          * Alternate Thing titles for charactes, such as " " for "space".
          */
         aliases?: IAliases;
+
+        /**
+         * A list of sounds that should be played for certain menu actions.
+         */
+        sounds?: ISoundNames;
 
         /**
          * Programmatic replacements for deliniated words.
@@ -841,6 +862,11 @@ declare module MenuGraphr {
         deleteActiveMenu(): void;
 
         /**
+         * Deletes all menus.
+         */
+        deleteAllMenus(): void;
+
+        /**
          * Adds dialog-style text to a menu. If the text overflows, 
          * 
          * @param name   The name of the menu.
@@ -894,9 +920,10 @@ declare module MenuGraphr {
         /**
          * Sets the currently active menu.
          * 
-         * @param name   The name of the menu to set as active.
+         * @param name   The name of the menu to set as active. If not given, no menu
+         *               is set as active.
          */
-        setActiveMenu(name: string): void;
+        setActiveMenu(name?: string): void;
 
         /**
          * Reacts to a user event directing in the given direction.
@@ -982,6 +1009,11 @@ module MenuGraphr {
         private schemas: IMenuSchemas;
 
         /**
+         * A list of sounds that should be played for certain menu actions
+         */
+        private sounds: ISoundNames;
+
+        /**
          * Alternate Thing titles for charactes, such as " " for "space".
          */
         private aliases: IAliases;
@@ -1015,6 +1047,7 @@ module MenuGraphr {
             this.aliases = settings.aliases || {};
             this.replacements = settings.replacements || {};
             this.replacerKey = settings.replacerKey || "%%%%%%%";
+            this.sounds = settings.sounds || {};
 
             this.menus = {};
         }
@@ -1240,6 +1273,17 @@ module MenuGraphr {
             }
         }
 
+        /**
+         * Deletes all menus.
+         */
+        deleteAllMenus(): void {
+            for (var key in this.menus) {
+                if (this.menus.hasOwnProperty(key)) {
+                    this.deleteMenu(key);
+                }
+            }
+        }
+
 
         /* Menu text
         */
@@ -1325,6 +1369,9 @@ module MenuGraphr {
                     this.addMenuWords(name, progress.words, progress.i, progress.x, progress.y, progress.onCompletion);
                 },
                 character.paddingY + 1);
+            if (this.sounds.onInteraction) {
+                this.GameStarter.AudioPlayer.play(this.sounds.onInteraction);
+            }
         }
 
 
@@ -1631,17 +1678,20 @@ module MenuGraphr {
         /**
          * Sets the currently active menu.
          * 
-         * @param name   The name of the menu to set as active.
+         * @param name   The name of the menu to set as active. If not given, no menu
+         *               is set as active.
          */
-        setActiveMenu(name: string): void {
+        setActiveMenu(name?: string): void {
             if (this.activeMenu && this.activeMenu.onInactive) {
                 this.activeMenu.onInactive(this.activeMenu.name);
             }
 
-            this.activeMenu = this.menus[name];
+            if (typeof name !== "undefined") {
+                this.activeMenu = this.menus[name];
 
-            if (this.activeMenu && this.activeMenu.onActive) {
-                this.activeMenu.onActive(name);
+                if (this.activeMenu && this.activeMenu.onActive) {
+                    this.activeMenu.onActive(name);
+                }
             }
         }
 
@@ -1754,6 +1804,10 @@ module MenuGraphr {
             if (menu.callback) {
                 menu.callback(menu.name);
             }
+
+            if (this.sounds.onInteraction && (!menu.progress || !menu.progress.working)) {
+                this.GameStarter.AudioPlayer.play(this.sounds.onInteraction);
+            }
         }
 
         /**
@@ -1783,6 +1837,10 @@ module MenuGraphr {
                 this.setActiveMenu(menu.backMenu);
             } else {
                 this.deleteMenu(menu.name);
+            }
+            
+            if (this.sounds.onInteraction && (!menu.progress || !menu.progress.working)) {
+                this.GameStarter.AudioPlayer.play(this.sounds.onInteraction);
             }
         }
 

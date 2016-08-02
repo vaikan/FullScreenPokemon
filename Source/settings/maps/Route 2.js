@@ -8,11 +8,13 @@ FullScreenPokemon.FullScreenPokemon.settings.maps.library["Route 2"] = {
             "direction": 0
         },
         "Viridian Forest Bottom": {
-            "area": "Land"
+            "area": "Land",
+            "push": true
         }
     },
     "areas": {
         "Land": {
+            "allowCycling": true,
             "width": 224,
             "height": 592,
             "creation": [

@@ -439,7 +439,7 @@ module AudioPlayr {
          * @returns The current volume as a Number in [0,1], retrieved by the ItemsHoldr.
          */
         getVolume(): number {
-            return Number(this.ItemsHolder.getItem("volume") || 0);
+            return parseFloat(this.ItemsHolder.getItem("volume")) || 1;
         }
 
         /**
@@ -593,7 +593,9 @@ module AudioPlayr {
                 sound.volume = this.getVolume();
             }
 
-            this.playSound(sound);
+            // This gives enough time after a call to pause so a Promise exception
+            // does not occur during the buffering for play.
+            setTimeout(this.playSound.bind(this), 1, sound);
             used = Number(sound.getAttribute("used"));
 
             // If this is the song's first play, let it know how to stop

@@ -20,7 +20,7 @@ var FullScreenPokemon;
             ".": "Period",
             ",": "Comma",
             "'": "Apostrophe",
-            "é": "eFancy"
+            "�": "eFancy"
         },
         "replacements": {
             "PLAYER": function (FSP) {
@@ -29,11 +29,11 @@ var FullScreenPokemon;
             "RIVAL": function (FSP) {
                 return FSP.ItemsHolder.getItem("nameRival");
             },
-            "POKE": "POKé".split(""),
-            "POKEMON": "POKéMON".split(""),
-            "POKEDEX": "POKéDEX".split(""),
+            "POKE": "POK�".split(""),
+            "POKEMON": "POK�MON".split(""),
+            "POKEDEX": "POK�DEX".split(""),
             "POKEDEX.SEEN": function (FSP) {
-                return FSP.makeDigit(FSP.getPokedexListingsOrdered(FSP)
+                return FSP.makeDigit(FSP.getPokedexListingsOrdered()
                     .filter(function (listing) {
                     return listing && listing.seen;
                 })
@@ -41,7 +41,7 @@ var FullScreenPokemon;
                     .split("");
             },
             "POKEDEX.OWN": function (FSP) {
-                return FSP.makeDigit(FSP.getPokedexListingsOrdered(FSP)
+                return FSP.makeDigit(FSP.getPokedexListingsOrdered()
                     .filter(function (listing) {
                     return listing && listing.caught;
                 })
@@ -49,8 +49,8 @@ var FullScreenPokemon;
                     .split("");
             },
             "BADGES.LENGTH": function (FSP) {
-                var badges = FSP.ItemsHolder.getItem("badges"), total = 0, i;
-                for (i in badges) {
+                var badges = FSP.ItemsHolder.getItem("badges"), total = 0;
+                for (var i in badges) {
                     if (badges.hasOwnProperty(i)) {
                         total += Number(badges[i]);
                     }
@@ -99,6 +99,9 @@ var FullScreenPokemon;
             "MONEY": true
         },
         "replaceFromItemsHolder": true,
+        "sounds": {
+            "menuSound": "Menu Bleep"
+        },
         "schemas": {
             "StartOptions": {
                 "size": {
@@ -1529,6 +1532,9 @@ var FullScreenPokemon;
                 "textSpeed": 0
             },
             "BattlePlayerHealthTitle": {
+                "size": {
+                    "width": 38
+                },
                 "position": {
                     "offset": {
                         "top": -12.5,

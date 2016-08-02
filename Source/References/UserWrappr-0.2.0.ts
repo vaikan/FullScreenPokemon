@@ -177,6 +177,12 @@ declare module UserWrappr {
         resetGameStarter(settings: IUserWrapprSettings, customs?: IGameStartrCustoms): void;
 
         /**
+         * Resets the visual aspect of the controls so they are updated with the
+         * recently changed values in ItemsHolder.
+         */
+        resetControls(): void;
+
+        /**
          * @returns The GameStartr implementation this is wrapping around.
          */
         getGameStartrConstructor(): IGameStartrConstructor;
@@ -1473,7 +1479,7 @@ module UserWrappr.UISchemas {
          * Ensures a collection of items all exist in localStorage. If their values
          * don't exist, their schema's .callback is used to provide them.
          * 
-         * @param childRaw   An Array of input or select elements.
+         * @param children   An Array of input or select elements.
          * @param details   Details containing the title of the item and the source 
          *                  Function to get its value.
          * @param schema   The container schema this child is within.
@@ -1718,6 +1724,8 @@ module UserWrappr {
             this.loadGameStarter(this.fixCustoms(customs));
 
             window[settings.globalName] = this.GameStarter;
+            window.addEventListener("unload", this.GameStarter.GamesRunner.close.bind(this.GameStarter.GamesRunner));
+
             this.GameStarter.UserWrapper = this;
 
             this.loadGenerators();
@@ -1732,6 +1740,14 @@ module UserWrappr {
             this.GameStarter.gameStart();
 
             this.startCheckingDevices();
+        }
+
+        /**
+         * Resets the visual aspect of the controls so they are updated with the
+         * recently changed values in ItemsHolder.
+         */
+        resetControls(): void {
+            this.loadControls(this.settings.schemas);
         }
 
 

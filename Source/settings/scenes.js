@@ -5,7 +5,7 @@ FullScreenPokemon.FullScreenPokemon.settings.scenes = {
             "routines": {
                 "Entrance": FullScreenPokemon.FullScreenPokemon.prototype.cutsceneBattleEntrance,
                 "OpeningText": FullScreenPokemon.FullScreenPokemon.prototype.cutsceneBattleOpeningText,
-                "EnemyIntro": FullScreenPokemon.FullScreenPokemon.prototype.cutsceneBattleEnemyIntro,
+                "OpponentIntro": FullScreenPokemon.FullScreenPokemon.prototype.cutsceneBattleOpponentIntro,
                 "PlayerIntro": FullScreenPokemon.FullScreenPokemon.prototype.cutsceneBattlePlayerIntro,
                 "ShowPlayerMenu": FullScreenPokemon.FullScreenPokemon.prototype.cutsceneBattleShowPlayerMenu,
                 "OpponentSendOut": FullScreenPokemon.FullScreenPokemon.prototype.cutsceneBattleOpponentSendOut,
@@ -37,7 +37,8 @@ FullScreenPokemon.FullScreenPokemon.settings.scenes = {
                 // Attack animations
                 "AttackGrowl": FullScreenPokemon.FullScreenPokemon.prototype.cutsceneBattleAttackGrowl,
                 "AttackTackle": FullScreenPokemon.FullScreenPokemon.prototype.cutsceneBattleAttackTackle,
-                "AttackTailWhip": FullScreenPokemon.FullScreenPokemon.prototype.cutsceneBattleAttackTailWhip
+                "AttackTailWhip": FullScreenPokemon.FullScreenPokemon.prototype.cutsceneBattleAttackTailWhip,
+                "AttackScratch": FullScreenPokemon.FullScreenPokemon.prototype.cutsceneBattleAttackScratch
             }
         },
         "TrainerSpotted": {

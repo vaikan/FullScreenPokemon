@@ -181,9 +181,9 @@ var ItemsHoldr;
          */
         function ItemsHoldr(settings) {
             if (settings === void 0) { settings = {}; }
-            var key;
-            this.prefix = settings.prefix || "";
+            this.settings = settings;
             this.autoSave = settings.autoSave;
+            this.prefix = settings.prefix || "";
             this.callbackArgs = settings.callbackArgs || [];
             this.allowNewItems = settings.allowNewItems === undefined
                 ? true : settings.allowNewItems;
@@ -198,18 +198,7 @@ var ItemsHoldr;
             }
             this.defaults = settings.defaults || {};
             this.displayChanges = settings.displayChanges || {};
-            this.items = {};
-            if (settings.values) {
-                this.itemKeys = Object.keys(settings.values);
-                for (key in settings.values) {
-                    if (settings.values.hasOwnProperty(key)) {
-                        this.addItem(key, settings.values[key]);
-                    }
-                }
-            }
-            else {
-                this.itemKeys = [];
-            }
+            this.resetItemsToDefaults();
             if (settings.doMakeContainer) {
                 this.containersArguments = settings.containersArguments || [
                     ["div", {
@@ -353,6 +342,7 @@ var ItemsHoldr;
             }
             this.itemKeys.splice(this.itemKeys.indexOf(key), 1);
             delete this.items[key];
+            delete this.localStorage[this.prefix + key];
         };
         /**
          * Completely clears all values from the ItemsHoldr, removing their
@@ -367,8 +357,7 @@ var ItemsHoldr;
                     }
                 }
             }
-            this.items = {};
-            this.itemKeys = [];
+            this.resetItemsToDefaults();
         };
         /**
          * Sets the value for the ItemValue under the given key, then updates the ItemValue
@@ -419,6 +408,12 @@ var ItemsHoldr;
             var value = this.items[key].getValue();
             value = value ? false : true;
             this.items[key].setValue(value);
+        };
+        /**
+         * Toggles whether autoSave is true or false.
+         */
+        ItemsHoldr.prototype.toggleAutoSave = function () {
+            this.autoSave = !this.autoSave;
         };
         /**
          * Ensures a key exists in values. If it doesn't, and new values are
@@ -664,6 +659,21 @@ var ItemsHoldr;
                 }
             });
             return output;
+        };
+        /**
+         * Resets this.items to their default values and resets this.itemKeys.
+         */
+        ItemsHoldr.prototype.resetItemsToDefaults = function () {
+            this.items = {};
+            this.itemKeys = [];
+            if (!this.settings.values) {
+                return;
+            }
+            for (var key in this.settings.values) {
+                if (this.settings.values.hasOwnProperty(key)) {
+                    this.addItem(key, this.settings.values[key]);
+                }
+            }
         };
         return ItemsHoldr;
     })();

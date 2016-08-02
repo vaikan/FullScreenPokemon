@@ -1,8 +1,9 @@
 /// <reference path="../FullScreenPokemon.ts" />
-var FullScreenPokemon;
-(function (FullScreenPokemon) {
+
+module FullScreenPokemon {
     "use strict";
-    FullScreenPokemon.FullScreenPokemon.settings.mods = {
+
+    FullScreenPokemon.settings.mods = {
         storeLocally: true,
         prefix: "FullScreenPokemon::Mods::",
         mods: [
@@ -10,25 +11,28 @@ var FullScreenPokemon;
                 name: "Running Indoors",
                 enabled: false,
                 events: {
-                    onModEnable: function (mod) {
-                        var area = this.AreaSpawner.getArea();
+                    onModEnable: function (mod: ModAttachr.IModAttachrMod): void {
+                        let area: IArea = this.AreaSpawner.getArea();
                         if (!area) {
                             return;
                         }
+
                         this.addStateHistory(area, "allowCycling", area.allowCycling);
                         area.allowCycling = true;
                     },
-                    onModDisable: function (mod) {
-                        var area = this.AreaSpawner.getArea();
+                    onModDisable: function (mod: ModAttachr.IModAttachrMod): void {
+                        let area: IArea = this.AreaSpawner.getArea();
                         if (!area) {
                             return;
                         }
+
                         this.popStateHistory(area, "allowCycling");
+
                         if (!area.allowCycling && this.player.cycling) {
                             this.stopCycling(this.player);
                         }
                     },
-                    onSetLocation: function (mod) {
+                    onSetLocation: function (mod: ModAttachr.IModAttachrMod): void {
                         mod.events.onModEnable.call(this, mod);
                     }
                 }
@@ -37,12 +41,12 @@ var FullScreenPokemon;
                 name: "Speedrunner",
                 enabled: false,
                 events: {
-                    onModEnable: function (mod) {
-                        var stats = this.ObjectMaker.getFunction("Player").prototype;
+                    onModEnable: function (mod: ModAttachr.IModAttachrMod): void {
+                        let stats: any = this.ObjectMaker.getFunction("Player").prototype;
                         this.player.speed = stats.speed = 10;
                     },
-                    onModDisable: function (mod) {
-                        var stats = this.ObjectMaker.getFunction("Player").prototype;
+                    onModDisable: function (mod: ModAttachr.IModAttachrMod): void {
+                        let stats: any = this.ObjectMaker.getFunction("Player").prototype;
                         this.player.speed = stats.speed = this.settings.objects.properties.Player.speed;
                     }
                 }
@@ -51,36 +55,36 @@ var FullScreenPokemon;
                 name: "Joey's Rattata",
                 enabled: false,
                 events: {
-                    onModEnable: function (mod) {
-                        var _this = this;
+                    onModEnable: function (mod: ModAttachr.IModAttachrMod): void {
                         this.GroupHolder.groups.Character
-                            .filter(function (character) { return character.trainer; })
-                            .forEach(function (character) {
-                            character.previousTitle = character.title;
-                            character.title = character.thing = "BugCatcher";
-                            _this.ThingHitter.cacheChecksForType(character, "Character");
-                            _this.setClass(character, character.className);
-                        });
+                            .filter((character: ICharacter): boolean => character.trainer)
+                            .forEach((character: IEnemy): void => {
+                                character.previousTitle = character.title;
+                                character.title = (<any>character).thing = "BugCatcher";
+                                this.ThingHitter.cacheChecksForType(character, "Character");
+                                this.setClass(character, character.className);
+                            });
                     },
-                    onModDisable: function (mod) {
-                        var _this = this;
+                    onModDisable: function (mod: ModAttachr.IModAttachrMod): void {
                         this.GroupHolder.groups.Character
-                            .filter(function (character) { return character.trainer; })
-                            .forEach(function (character) {
-                            character.title = character.thing = character.previousTitle;
-                            _this.ThingHitter.cacheChecksForType(character, "Character");
-                            _this.setClass(character, character.className);
-                        });
+                            .filter((character: ICharacter): boolean => character.trainer)
+                            .forEach((character: IEnemy): void => {
+                                character.title = (<any>character).thing = character.previousTitle;
+                                this.ThingHitter.cacheChecksForType(character, "Character");
+                                this.setClass(character, character.className);
+                            });
                     },
-                    onBattleStart: function (mod, eventName, battleInfo) {
-                        var opponent = battleInfo.opponent;
+                    onBattleStart: function (mod: ModAttachr.IModAttachrMod, eventName: string, battleInfo: IBattleInfo): void {
+                        let opponent: IBattleThingInfo = battleInfo.opponent;
+
                         opponent.sprite = "BugCatcherFront";
                         opponent.name = "YOUNGSTER JOEY".split("");
-                        for (var i = 0; i < opponent.actors.length; i += 1) {
+
+                        for (let i: number = 0; i < opponent.actors.length; i += 1) {
                             opponent.actors[i].title = opponent.actors[i].nickname = "RATTATA".split("");
                         }
                     },
-                    onSetLocation: function (mod) {
+                    onSetLocation: function (mod: ModAttachr.IModAttachrMod): void {
                         mod.events.onModEnable.call(this, mod);
                     }
                 }
@@ -89,23 +93,27 @@ var FullScreenPokemon;
                 name: "Level 100",
                 enabled: false,
                 events: {
-                    "onModEnable": function (mod) {
-                        var partyPokemon = this.ItemsHolder.getItem("PokemonInParty"), statistics = this.MathDecider.getConstant("statisticNames");
-                        for (var i = 0; i < partyPokemon.length; i += 1) {
+                    "onModEnable": function (mod: ModAttachr.IModAttachrMod): void {
+                        let partyPokemon: IPokemon[] = this.ItemsHolder.getItem("PokemonInParty"),
+                            statistics: string[] = this.MathDecider.getConstant("statisticNames");
+
+                        for (let i: number = 0; i < partyPokemon.length; i += 1) {
                             partyPokemon[i].previousLevel = partyPokemon[i].level;
                             partyPokemon[i].level = 100;
-                            for (var j = 0; j < statistics.length; j += 1) {
+                            for (let j: number = 0; j < statistics.length; j += 1) {
                                 partyPokemon[i][statistics[j]] = partyPokemon[i][statistics[j] + "Normal"] =
                                     this.MathDecider.compute("pokemonStatistic", partyPokemon[i], statistics[j]);
                             }
                         }
                     },
-                    "onModDisable": function (mod) {
-                        var partyPokemon = this.ItemsHolder.getItem("PokemonInParty"), statistics = this.MathDecider.getConstant("statisticNames");
-                        for (var i = 0; i < partyPokemon.length; i += 1) {
+                    "onModDisable": function (mod: ModAttachr.IModAttachrMod): void {
+                        let partyPokemon: IPokemon[] = this.ItemsHolder.getItem("PokemonInParty"),
+                            statistics: string[] = this.MathDecider.getConstant("statisticNames");
+
+                        for (let i: number = 0; i < partyPokemon.length; i += 1) {
                             partyPokemon[i].level = partyPokemon[i].previousLevel;
                             partyPokemon[i].previousLevel = undefined;
-                            for (var j = 0; j < statistics.length; j += 1) {
+                            for (let j: number = 0; j < statistics.length; j += 1) {
                                 partyPokemon[i][statistics[j]] = partyPokemon[i][statistics[j] + "Normal"] =
                                     this.MathDecider.compute("pokemonStatistic", partyPokemon[i], statistics[j]);
                             }
@@ -117,11 +125,11 @@ var FullScreenPokemon;
                 name: "Walk Through Walls",
                 enabled: false,
                 events: {
-                    onModEnable: function (mod) {
-                        this.ObjectMaker.getFunction("Solid").prototype.collide = function () { return true; };
+                    onModEnable: function (mod: ModAttachr.IModAttachrMod): void {
+                        this.ObjectMaker.getFunction("Solid").prototype.collide = (): boolean => true;
                     },
-                    onModDisable: function (mod) {
-                        this.ObjectMaker.getFunction("Solid").prototype.collide = function () { return false; };
+                    onModDisable: function (mod: ModAttachr.IModAttachrMod): void {
+                        this.ObjectMaker.getFunction("Solid").prototype.collide = (): boolean => false;
                     }
                 }
             },
@@ -129,10 +137,10 @@ var FullScreenPokemon;
                 name: "Blind Trainers",
                 enabled: false,
                 events: {
-                    "onModEnable": function (mod) {
+                    "onModEnable": function (mod: ModAttachr.IModAttachrMod): void {
                         this.ObjectMaker.getFunction("SightDetector").prototype.nocollide = true;
                     },
-                    "onModDisable": function (mod) {
+                    "onModDisable": function (mod: ModAttachr.IModAttachrMod): void {
                         this.ObjectMaker.getFunction("SightDetector").prototype.nocollide = false;
                     }
                 }
@@ -141,10 +149,10 @@ var FullScreenPokemon;
                 name: "Nuzlocke Challenge",
                 enabled: false,
                 events: {
-                    "onModEnable": function (mod) {
+                    "onModEnable": function (mod: ModAttachr.IModAttachrMod): void {
                         return;
                     },
-                    "onModDisable": function (mod) {
+                    "onModDisable": function (mod: ModAttachr.IModAttachrMod): void {
                         return;
                     },
                     /**
@@ -154,11 +162,16 @@ var FullScreenPokemon;
                      * @param eventName   The name of the event that was fired.
                      * @param settings   The battle information.
                      */
-                    "onBattleComplete": function (mod, eventName, settings) {
-                        var grass = this.player.grass, grassMap = grass ? this.AreaSpawner.getMap(grass.mapName) : undefined, grassArea = grassMap ? grassMap.areas[grass.areaName] : undefined, opponent = settings.opponent.category;
+                    "onBattleComplete": function (mod: ModAttachr.IModAttachrMod, eventName: string, settings: IBattleInfo): void {
+                        let grass: IGrass = this.player.grass,
+                            grassMap: IMap = grass ? <IMap>this.AreaSpawner.getMap(grass.mapName) : undefined,
+                            grassArea: IArea = grassMap ? <IArea>grassMap.areas[grass.areaName] : undefined,
+                            opponent: String = settings.opponent.category;
+
                         if (!grassArea || opponent !== "Wild") {
                             return;
                         }
+
                         grassArea.pokemonEncountered = true;
                     },
                     /**
@@ -168,13 +181,16 @@ var FullScreenPokemon;
                      * @param eventName   The name of the event that was fired.
                      * @param items   The Player's items.
                      */
-                    "onOpenItemsMenu": function (mod, eventName, items) {
-                        var grassMap = this.player.grass && this.AreaSpawner.getMap(this.player.grass.mapName), grassArea = grassMap && grassMap.areas[this.player.grass.areaName];
+                    "onOpenItemsMenu": function (mod: ModAttachr.IModAttachrMod, eventName: string, items: any[]): void {
+                        let grassMap: IMap = this.player.grass && <IMap>this.AreaSpawner.getMap(this.player.grass.mapName),
+                            grassArea: IArea = grassMap && <IArea>grassMap.areas[this.player.grass.areaName];
+
                         if (!this.BattleMover.getInBattle() || !(grassArea && grassArea.pokemonEncountered)) {
                             return;
                         }
-                        for (var i = items.length - 1; i > -1; i -= 1) {
-                            var currentItem = this.MathDecider.getConstant("items")[items[i].item];
+
+                        for (let i: number = items.length - 1; i > -1; i -= 1) {
+                            let currentItem: IItemSchema = this.MathDecider.getConstant("items")[items[i].item];
                             if (currentItem.category === "PokeBall") {
                                 items.splice(i, 1);
                             }
@@ -188,8 +204,14 @@ var FullScreenPokemon;
                      * @param thing   The fainted Pokemon.
                      * @param actors   The Player's party Pokemon.
                      */
-                    "onFaint": function (mod, eventName, thing, actors) {
-                        var partyPokemon = this.ItemsHolder.getItem("PokemonInParty"), pcPokemon = this.ItemsHolder.getItem("PokemonInPC");
+                    "onFaint": function (
+                        mod: ModAttachr.IModAttachrMod,
+                        eventName: string,
+                        thing: BattleMovr.IActor,
+                        actors: IPokemon[]): void {
+                        let partyPokemon: BattleMovr.IActor[] = this.ItemsHolder.getItem("PokemonInParty"),
+                            pcPokemon: BattleMovr.IActor[] = this.ItemsHolder.getItem("PokemonInPC");
+
                         actors.splice(actors.indexOf(thing), 1);
                         partyPokemon.splice(partyPokemon.indexOf(thing), 1);
                         pcPokemon.push(thing);
@@ -205,16 +227,16 @@ var FullScreenPokemon;
                      *
                      * @param mod   The triggered mod.
                      */
-                    onModEnable: function (mod) {
-                        this.checkPlayerGrassBattle = function () { return false; };
+                    onModEnable: function (mod: ModAttachr.IModAttachrMod): void {
+                        this.checkPlayerGrassBattle = (): boolean => false;
                     },
                     /**
                      * Allows the Player to encounter wild Pokemon.
                      *
                      * @param mod   The triggered mod.
                      */
-                    onModDisable: function (mod) {
-                        this.checkPlayerGrassBattle = FullScreenPokemon.FullScreenPokemon.prototype.checkPlayerGrassBattle;
+                    onModDisable: function (mod: ModAttachr.IModAttachrMod): void {
+                        this.checkPlayerGrassBattle = FullScreenPokemon.prototype.checkPlayerGrassBattle;
                     }
                 }
             },
@@ -222,13 +244,13 @@ var FullScreenPokemon;
                 name: "Repeat Trainers",
                 enabled: false,
                 events: {
-                    onModEnable: function (mod) {
+                    onModEnable: function (mod: ModAttachr.IModAttachrMod): void {
                         return;
                     },
-                    onModDisable: function (mod) {
+                    onModDisable: function (mod: ModAttachr.IModAttachrMod): void {
                         return;
                     },
-                    onDialogFinish: function (mod, eventName, other) {
+                    onDialogFinish: function (mod: ModAttachr.IModAttachrMod, eventName: string, other: IEnemy): void {
                         if (other.trainer) {
                             other.alreadyBattled = false;
                         }
@@ -239,25 +261,31 @@ var FullScreenPokemon;
                 name: "Scaling Levels",
                 enabled: false,
                 events: {
-                    onModEnable: function (mod) {
+                    onModEnable: function (mod: ModAttachr.IModAttachrMod): void {
                         return;
                     },
-                    onModDisable: function (mod) {
+                    onModDisable: function (mod: ModAttachr.IModAttachrMod): void {
                         return;
                     },
                     /**
                      * Right before the battle starts, scales the enemy Pokemon
                      * to be around the same level as those in the player's party.
-                     *
+                     * 
                      * @param mod   The mod being fired.
                      * @param eventName   The name of the mod event being fired.
                      * @param battleInfo   Settings for the current battle.
                      */
-                    onBattleReady: function (mod, eventName, battleInfo) {
-                        var opponent = battleInfo.opponent, player = battleInfo.player, statistics = this.MathDecider.getConstant("statisticNames"), enemyPokemonAvg = this.MathDecider.compute("averageLevel", opponent.actors), playerPokemonAvg = this.MathDecider.compute("averageLevel", player.actors);
-                        for (var i = 0; i < opponent.actors.length; i += 1) {
+                    onBattleReady: function (mod: ModAttachr.IModAttachr, eventName: string, battleInfo: IBattleInfo): void {
+                        let opponent: IBattleThingInfo = battleInfo.opponent,
+                            player: IBattleThingInfo = battleInfo.player,
+                            statistics: string[] = this.MathDecider.getConstant("statisticNames"),
+                            enemyPokemonAvg: number = this.MathDecider.compute("averageLevel", opponent.actors),
+                            playerPokemonAvg: number = this.MathDecider.compute("averageLevel", player.actors);
+
+                        for (let i: number = 0; i < opponent.actors.length; i += 1) {
                             opponent.actors[i].level += playerPokemonAvg - enemyPokemonAvg;
-                            for (var j = 0; j < statistics.length; j += 1) {
+
+                            for (let j: number = 0; j < statistics.length; j += 1) {
                                 opponent.actors[i][statistics[j]] = opponent.actors[i][statistics[j] + "Normal"] =
                                     this.MathDecider.compute("pokemonStatistic", opponent.actors[i], statistics[j]);
                             }
@@ -266,4 +294,4 @@ var FullScreenPokemon;
                 }
             }]
     };
-})(FullScreenPokemon || (FullScreenPokemon = {}));
+}

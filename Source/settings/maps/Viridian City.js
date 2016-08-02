@@ -38,8 +38,36 @@ FullScreenPokemon.FullScreenPokemon.settings.maps.library["Viridian City"] = {
     },
     "areas": {
         "Land": {
+            "allowCycling": true,
             "width": 320,
             "height": 288,
+            "wildPokemon": {
+                "fishing": {
+                    "old": [{
+                        "title": "MAGIKARP".split(""),
+                        "levels": [5],
+                        "rate": 1
+                    }],
+                    "good": [{
+                        "title": "POLIWAG".split(""),
+                        "levels": [10],
+                        "rate": .5
+                    }, {
+                        "title": "GOLDEEN".split(""),
+                        "levels": [10],
+                        "rate": .5
+                    }],
+                    "super": [{
+                        "title": "POLIWAG".split(""),
+                        "levels": [15],
+                        "rate": .5
+                    }, {
+                        "title": "TENTACOOL".split(""),
+                        "levels": [15],
+                        "rate": .5
+                    }]
+                }
+            },
             "creation": [
                 { "thing": "AreaSpawner", "width": 320, "map": "Route 2", "area": "Land", "direction": 0, "offsetX": 48 },
                 { "thing": "AreaSpawner", "height": 288, "map": "Route 22", "area": "Land", "direction": 3, "offsetY": 64 },
@@ -106,7 +134,7 @@ FullScreenPokemon.FullScreenPokemon.settings.maps.library["Viridian City"] = {
                 { "thing": "ThemePlayer", "x": 8, "y": 112, "height": 32, "theme": "Pewter City" },
                 { "macro": "Checkered", "things": ["DirtClean", "DirtWhite"], "x": 160, "y": 112, "xnum": 16, "ynum": 2 },
                 { "macro": "House", "x": 160, "y": 112, "door": true, "entrance": "School Front Door", "transport": "School Floor 1 Door" },
-                { "thing": "DirtLight", "y": 128, "width": 16, "height": 24 },
+                { "thing": "DirtLight", "y": 128, "width": 16, "height": 16 },
                 { "macro": "Checkered", "things": ["DirtClean", "DirtWhite"], "x": 16, "y": 128, "xnum": 4, "ynum": 2 },
                 { "thing": "DirtLight", "x": 128, "y": 128, "width": 16, "height": 16 },
                 { "thing": "DirtLight", "x": 160, "y": 128, "width": 32, "height": 16 },
@@ -182,6 +210,7 @@ FullScreenPokemon.FullScreenPokemon.settings.maps.library["Viridian City"] = {
             ]
         },
         "Nicknamer House": {
+            "allowCycling": false,
             "width": 64,
             "height": 64,
             "invisibleWallBorders": true,
@@ -209,6 +238,7 @@ FullScreenPokemon.FullScreenPokemon.settings.maps.library["Viridian City"] = {
             ]
         },
         "School": {
+            "allowCycling": false,
             "width": 64,
             "height": 64,
             "invisibleWallBorders": true,
@@ -251,6 +281,7 @@ FullScreenPokemon.FullScreenPokemon.settings.maps.library["Viridian City"] = {
             ]
         },
         "PokeCenter": {
+            "allowCycling": false,
             "width": 112,
             "height": 64,
             "invisibleWallBorders": true,
@@ -261,6 +292,7 @@ FullScreenPokemon.FullScreenPokemon.settings.maps.library["Viridian City"] = {
             ]
         },
         "PokeMart": {
+            "allowCycling": false,
             "width": 64,
             "height": 64,
             "invisibleWallBorders": true,
